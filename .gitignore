@@ -1,0 +1,10 @@
+tmp
+node_modules/
+.DS_Store
+.env
+.env.*
+workspace.json
+app.json
+core-plugins.json
+logs/
+*.log
