@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
     // Route /api/pdf
     if (req.url.startsWith("/api/pdf")) {
-      const { default: pdfHandler } = await import("./pdfToJson.js");
+      const { default: pdfHandler } = await import("./pdfTojson.js");
       return pdfHandler(req, res);
     }
 
