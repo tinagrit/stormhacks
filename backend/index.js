@@ -1,16 +1,21 @@
-export default async function handler(req, res) {
-  const url = req.url.replace(/\/$/, ""); 
+import express from "express";
+import serverless from "serverless-http";
 
-  if (url === "/api/pdfTojson") {
-    const { default: pdfHandler } = await import("../pdfTojson.js");
-    return pdfHandler(req, res);
-  }
+const app = express();
+app.use(express.json());
 
-  if (url === "/api/quote") {
-    const { default: quoteHandler } = await import("../quote.js");
-    return quoteHandler(req, res);
-  }
+// Import handlers
+import pdfHandler from "./pdfTojson.js";
+import quoteHandler from "./quote.js";
 
+// Routes
+app.post("/api/pdfTojson", pdfHandler);
+app.post("/api/quote", quoteHandler);
 
+// Catch-all 404
+app.use((req, res) => {
   res.status(404).json({ error: "Not found" });
-}
+});
+
+// Export serverless handler
+export default serverless(app);
