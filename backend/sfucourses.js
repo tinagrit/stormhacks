@@ -117,6 +117,7 @@ router.get("/outline", async (req, res) => {
   try {
     const data = await cachedFetch(`${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(term)}/${encodeURIComponent(dept)}/${encodeURIComponent(course)}/${encodeURIComponent(section)}`);
     const courseSchedule = data.courseSchedule;
+    const info = data.info;
 
     // console.log(courseSchedule);
 
@@ -152,7 +153,7 @@ router.get("/outline", async (req, res) => {
       });
     }
 
-    res.json({ sem: `${term} ${year}`, events});
+    res.json({ sem: `${term} ${year}`, info, courseSchedule, events});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch course outline" });
