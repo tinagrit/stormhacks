@@ -4,6 +4,7 @@
 const express = require("express");
 const fetch = require("node-fetch");
 const path = require('path');
+const cors = require("cors");
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION
@@ -42,6 +43,10 @@ async function cachedFetch(url) {
 let appendCounter = 0;
 
 // --- Routes ---
+
+router.use(cors({
+  origin: "https://stormhacks.tinagrit.com"
+}))
 
 router.get("/years", async (req, res) => {
   try {
