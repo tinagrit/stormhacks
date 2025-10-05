@@ -330,6 +330,13 @@
             margin-left: 0.5rem;
         }
 
+
+        #add-course-button.inactive {
+            background-color: #2a2a2a;
+            border-color: #0a0a0a;
+            cursor: not-allowed;
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -547,7 +554,7 @@
             </div>
 
             <div style="text-align: right;">
-                <button class="btn btn-primary btn-lg">Add Course</button>
+                <button class="btn btn-primary btn-lg inactive" id="add-course-button">Add Course</button>
             </div>
 
             <h3 class="text-primary mb-4">Current Courses</h3>

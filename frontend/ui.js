@@ -42,6 +42,10 @@ function saveTasksToLocalStorage() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
+function saveCoursesToLocalStorage() {
+    localStorage.setItem('courses', JSON.stringify(courses));
+}
+
 function loadTasksFromLocalStorage() {
     const storedTasks = localStorage.getItem('tasks');
     if (storedTasks) {
@@ -53,6 +57,18 @@ function loadTasksFromLocalStorage() {
     }
 }
 loadTasksFromLocalStorage();
+
+function loadCoursesFromLocalStorage() {
+    const storedCourses = localStorage.getItem('courses');
+    if (storedCourses) {
+        try {
+            courses = JSON.parse(storedCourses);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+}
+loadCoursesFromLocalStorage();
 
 
 
@@ -393,9 +409,8 @@ function createCourseCard(course) {
     `;
 }
 
+const currentCoursesList = document.getElementById('current-courses-list');
 function renderCoursesList() {
-    const currentCoursesList = document.getElementById('current-courses-list');
-
     const currentCourses = courses;
 
     currentCoursesList.innerHTML = currentCourses.map(course => createCourseCard(course)).join('');
@@ -433,6 +448,8 @@ deptSelect.innerHTML = "";
 courseSelect.innerHTML = "";
 sectionSelect.innerHTML = "";
 
+let allowedToAddCourse = false;
+
 termSelect.addEventListener("change", async () => {
     const year = currentYear;
     const term = termSelect.value;
@@ -440,6 +457,10 @@ termSelect.addEventListener("change", async () => {
     await fetchAndFill("departments", { year, term }, deptSelect);
     courseSelect.innerHTML = "";
     sectionSelect.innerHTML = "";
+    allowedToAddCourse = false;
+    if (!(document.getElementById('add-course-button').classList.contains('inactive'))) {
+        document.getElementById('add-course-button').classList.add('inactive');
+    }
 });
 
 deptSelect.addEventListener("change", async () => {
@@ -449,6 +470,10 @@ deptSelect.addEventListener("change", async () => {
     if (!dept) return;
     await fetchAndFill("courses", { year, term, dept }, courseSelect);
     sectionSelect.innerHTML = "";
+    allowedToAddCourse = false;
+    if (!(document.getElementById('add-course-button').classList.contains('inactive'))) {
+        document.getElementById('add-course-button').classList.add('inactive');
+    }
 });
 
 courseSelect.addEventListener("change", async () => {
@@ -458,8 +483,13 @@ courseSelect.addEventListener("change", async () => {
     const course = courseSelect.value;
     if (!course) return;
     await fetchAndFill("sections", { year, term, dept, course }, sectionSelect);
+    allowedToAddCourse = false;
+    if (!(document.getElementById('add-course-button').classList.contains('inactive'))) {
+        document.getElementById('add-course-button').classList.add('inactive');
+    }
 });
 
+let fetchedCourse = null;
 sectionSelect.addEventListener("change", () => {
     const year = currentYear;
     const { value: term } = termSelect;
@@ -468,9 +498,55 @@ sectionSelect.addEventListener("change", () => {
     const { value: section } = sectionSelect;
 
     if (section) {
+        allowedToAddCourse = true;
+        if (document.getElementById('add-course-button').classList.contains('inactive')) {
+            document.getElementById('add-course-button').classList.remove('inactive');
+        }
+
+        const url = new URL(`${backend}/outline`);
+        Object.entries({
+            year: currentYear,
+            term: termSelect.value,
+            dept: deptSelect.value,
+            course: courseSelect.value,
+            section: sectionSelect.value
+        }).forEach(([k, v]) => url.searchParams.set(k, v));
+
+        fetch(url).then(res => {
+            if (!res.ok) {
+                throw new Error(`status: ${res.status}`);
+            }
+            return res.json();
+        }).then(json=>{
+            fetchedCourse = json.info;
+        })
+
         console.log(`✅ You selected: ${year} ${term} ${dept} ${course} ${section}`);
     }
 });
+
+document.getElementById('add-course-button').addEventListener('click',()=> {
+    if (allowedToAddCourse) {
+        if (fetchedCourse) {
+            let courseNum = fetchedCourse.dept + ' ' + fetchedCourse.number;
+            let newCourse = {num: courseNum, desc: fetchedCourse.title}
+            courses.push(newCourse);
+            currentCoursesList.innerHTML += createCourseCard(newCourse);
+
+            fetchedCourse = null;
+            deptSelect.innerHTML = "";
+            courseSelect.innerHTML = "";
+            sectionSelect.innerHTML = "";
+
+            termSelect.innerHTML = "";
+            fetchAndFill("terms", { year: currentYear }, termSelect);
+
+            allowedToAddCourse = false;
+
+            saveCoursesToLocalStorage();
+        }
+    }
+})
 
 
 
