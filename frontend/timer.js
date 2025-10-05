@@ -40,6 +40,9 @@ let totalTime = 0;
 function recalculateBlocks() {
     numBlocks = Math.floor(studyTime / studyBlock);
     totalTime = (numBlocks * studyBlock) + ((numBlocks - 1) * breakBlock);
+    if (totalTime < 0) {
+        totalTime = 0;
+    }
     blocks = [];
     for (let i = 0; i < numBlocks; i++) {
         blocks.push({ type: 'study', duration: studyBlock });

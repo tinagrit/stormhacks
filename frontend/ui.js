@@ -51,12 +51,16 @@ studyTimeSlider.addEventListener('input', () => {
     studyBlock = parseInt(studyTimeSlider.value);
     studyTimeValue.innerHTML = studyBlock + ' min';
     studyBlock = minToMs(studyBlock);
+    recalculateBlocks();
+    previewTime.innerHTML = Math.floor(totalTime / (1000*60)) + ' min'
 });
 
 breakTimeSlider.addEventListener('input', () => {
     breakBlock = parseInt(breakTimeSlider.value);
     breakTimeValue.innerHTML = breakBlock + ' min';
     breakBlock = minToMs(breakBlock);
+    recalculateBlocks();
+    previewTime.innerHTML = Math.floor(totalTime / (1000*60)) + ' min'
 });
 
 // Task Management
@@ -133,6 +137,8 @@ function updateTaskTime() {
     });
     document.getElementById('total-time-value').innerHTML = studyTime + ' min';
     studyTime = minToMs(studyTime);
+    recalculateBlocks();
+    previewTime.innerHTML = (Math.floor(totalTime / (1000*60))) + ' min'
 }
 
 function getPriorityLabel(priority) {
