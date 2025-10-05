@@ -74,6 +74,7 @@ function restartTimer() {
 }
 
 function tick() {
+    console.log('ticking!');
     let now = Date.now();
     let elapsed = now - startTime;
     let timePassed = 0, state = 'study', timeInBlock = 0, blockIndex = 0;

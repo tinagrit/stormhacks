@@ -292,6 +292,7 @@ document.getElementById('add-time-btn').addEventListener('click', () => {
 
 function updateSessionDisplay() {
     recalculateBlocks();
+    restartTimer();
     requestAnimationFrame(tick);
 }
 
