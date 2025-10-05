@@ -1,4 +1,4 @@
-import pdfHandler from "./pdfToJson.js";
+import pdfHandler from "./pdfTojson.js";
 import quoteHandler from "./quote.js";
 
 export default async function handler(req, res) {
