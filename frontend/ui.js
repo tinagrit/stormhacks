@@ -9,6 +9,16 @@ let isPaused = false;
 let studyBlock = minToMs(25);
 let breakBlock = minToMs(10);
 
+let niceQuoteOfTheSession = " ";
+fetch('https://stormhacks.api.tinagrit.com/api/quote').then(res => {
+    if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return res.json(); // parse response as JSON
+}).then(json => {
+    niceQuoteOfTheSession = json.quote;
+})
+
 
 // local storage
 let tasks = [
@@ -330,7 +340,8 @@ document.getElementById('start-session-btn').addEventListener('click', () => {
 document.getElementById('exit-session-btn').addEventListener('click', () => {
     // stop the timer
 
-    document.getElementById('timer-session').classList.add('hidden');
+    // document.getElementById('timer-session').classList.add('hidden');
+    window.location.reload();
 });
 
 // document.getElementById('pause-resume-btn').addEventListener('click', () => {
@@ -343,6 +354,12 @@ document.getElementById('exit-session-btn').addEventListener('click', () => {
 //         // stop the timer
 //     }
 // });
+
+document.getElementById('finish-task-btn').addEventListener('click',()=> {
+    if (fullTimer.time != 0) {
+        skipToNextTask();
+    }
+})
 
 document.getElementById('add-time-btn').addEventListener('click', () => {
     addStudyMinutes(5);

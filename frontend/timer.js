@@ -80,7 +80,7 @@ function assignTasksToStudyBlocks() {
         // Fit task slices into this study block
         while (blockLeft > 0 && taskList.length > 0) {
             let slice = Math.min(taskLeft, blockLeft);
-            segmentTasks.push({ name: taskList[taskIndex].title, time: slice });
+            segmentTasks.push({ name: taskList[taskIndex].title, time: slice, id: taskList[taskIndex].id });
             taskLeft -= slice;
             blockLeft -= slice;
             if (taskLeft === 0) {
@@ -175,6 +175,8 @@ function tick() {
         }
     } else {
         document.getElementById('session-phase').textContent = "Session Ended";
+        document.getElementById('mainBackground').classList.add('finished');
+        document.getElementById('current-task-name').textContent = niceQuoteOfTheSession;
     }
 
     updateHTML();
@@ -182,4 +184,75 @@ function tick() {
     if (fullTimer.time > 0) {
         setTimeout(()=>{requestAnimationFrame(tick);},500);
     }
+}
+
+function skipToNextTask() {
+    let now = Date.now();
+    let elapsed = now - startTime;
+
+    let flattenedTasks = [];
+    let cumulative = 0;
+    for (const block of blocks) {
+        if (block.type === 'study' && block.tasks) {
+            for (const segment of block.tasks) {
+                flattenedTasks.push({
+                    name: segment.name,
+                    start: cumulative,
+                    duration: segment.time,
+                    id: segment.id
+                });
+                cumulative += segment.time;
+            }
+        } else {
+            cumulative += block.duration;
+        }
+    }
+    
+
+    let currentTaskName = null;
+    let currentTaskId = null;
+    for (const t of flattenedTasks) {
+        if (elapsed >= t.start && elapsed < t.start + t.duration) {
+            currentTaskName = t.name;
+            currentTaskId = t.id;
+            break;
+        }
+    }
+
+    if (!currentTaskName) {
+        startTime = now - totalTime;
+        tick();
+        return;
+    }
+    
+    for (let i=0; i<tasks.length; i++) {
+        if (tasks[i].id == currentTaskId) {
+            tasks.splice(i,1);
+            saveTasksToLocalStorage();
+        }
+    }
+
+    // find start time of next task
+    for (let i = 0; i < flattenedTasks.length; i++) {
+        if (flattenedTasks[i].name === currentTaskName) {
+            let j = i + 1;
+            while (j < flattenedTasks.length && flattenedTasks[j].name === currentTaskName) {
+                j++;
+            }
+            if (j < flattenedTasks.length) {
+                startTime = now - flattenedTasks[j].start;
+                tick();
+                return;
+            } else {
+                // current is last task
+                startTime = now - totalTime;
+                tick();
+                return;
+            }
+        }
+    }
+
+    // fallback
+    startTime = now - totalTime;
+    tick();
 }
