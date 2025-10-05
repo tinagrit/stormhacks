@@ -1,21 +1,16 @@
 import express from "express";
 import serverless from "serverless-http";
+import pdfHandler from "./pdfToJson.js";
+import quoteHandler from "./quote.js";
 
 const app = express();
 app.use(express.json());
 
-// Import handlers
-import pdfHandler from "./pdfTojson.js";
-import quoteHandler from "./quote.js";
-
 // Routes
-app.post("/pdfTojson", pdfHandler);
-app.post("/quote", quoteHandler);
+app.post("/api/pdf", pdfHandler);
+app.post("/api/quote", quoteHandler);
 
-// Catch-all 404
-app.use((req, res) => {
-  res.status(404).json({ error: "Not found" });
-});
+// Catch-all
+app.use((req, res) => res.status(404).json({ error: "not found" }));
 
-// Export serverless handler
 export default serverless(app);
