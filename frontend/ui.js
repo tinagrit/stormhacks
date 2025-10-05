@@ -435,7 +435,7 @@ function renderCoursesList() {
     })
 }
 
-const backend = "https://stormhacks.api.tinagrit.com/api/sfucourses/";
+const backend = "https://stormhacks.api.tinagrit.com/api/sfucourses";
 
 const termSelect = document.getElementById("term");
 const deptSelect = document.getElementById("dept");
