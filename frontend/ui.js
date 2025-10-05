@@ -11,6 +11,10 @@ let breakBlock = minToMs(10);
 
 let haveWorkingArduino = false;
 
+const startHour = 8; // 8 AM
+const endHour = 20;  // 8 PM
+const totalMinutes = (endHour - startHour) * 60;
+
 // fallback value in case API doesn't work
 let niceQuoteOfTheSession = "Engage your mind. Every discovery today fuels tomorrow's brilliance.";
 
@@ -33,10 +37,12 @@ let tasks = [
 ];
 
 let courses = [
-    { num: 'CMPT 225', desc: 'Data Structures and Programming' },
-    { num: 'CMPT 201', desc: 'Systems Programming' },
-    { num: 'EASC 103', desc: 'The Rise and Fall of the Dinosaurs' }
+    {"num":"CMPT 201","desc":"Systems Programming","calendar":[{"name":"CMPT 201","day":1,"startTime":"14:30","endTime":"16:20"},{"name":"CMPT 201","day":3,"startTime":"14:30","endTime":"16:20"}]},
+    {"num":"CMPT 225","desc":"Data Structures and Programming","calendar":[{"name":"CMPT 225","day":2,"startTime":"11:30","endTime":"13:20"},{"name":"CMPT 225","day":4,"startTime":"11:30","endTime":"12:20"}]},
+    {"num":"EASC 103","desc":"The Rise and Fall of the Dinosaurs","calendar":[{"name":"EASC 103","day":1,"startTime":"9:30","endTime":"10:20"},{"name":"EASC 103","day":3,"startTime":"9:30","endTime":"10:20"},{"name":"EASC 103","day":5,"startTime":"9:30","endTime":"10:20"}]}
 ]
+
+let calendar = []
 
 function saveTasksToLocalStorage() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -68,6 +74,16 @@ function loadCoursesFromLocalStorage() {
     if (storedCourses) {
         try {
             courses = JSON.parse(storedCourses);
+
+            courses.forEach(course => {
+                if (course.calendar) {
+                    course.calendar.forEach(schedule => {
+                        calendar.push(schedule);
+                    })
+                }
+            })
+            importEvents(calendar)
+            calendar = []
         } catch (e) {
             console.error(e);
         }
@@ -509,6 +525,7 @@ courseSelect.addEventListener("change", async () => {
 });
 
 let fetchedCourse = null;
+let fetchedSchedule = null;
 sectionSelect.addEventListener("change", () => {
     const year = currentYear;
     const { value: term } = termSelect;
@@ -538,18 +555,32 @@ sectionSelect.addEventListener("change", () => {
             return res.json();
         }).then(json=>{
             fetchedCourse = json.info;
+            fetchedSchedule = json.courseSchedule;
         })
 
         console.log(`✅ You selected: ${year} ${term} ${dept} ${course} ${section}`);
     }
 });
 
+const twoLetterDateToNumber = (letterDate) => {
+    switch(letterDate) {
+        case 'Mo': return 1;
+        case 'Tu': return 2;
+        case 'We': return 3;
+        case 'Th': return 4;
+        case 'Fr': return 5;
+        case 'Sa': return 6;
+        case 'Su': return 0;
+        default: return -1;
+    }
+}
+
 document.getElementById('add-course-button').addEventListener('click',()=> {
     if (allowedToAddCourse) {
         if (fetchedCourse) {
             let courseNum = fetchedCourse.dept + ' ' + fetchedCourse.number;
             let newCourse = {num: courseNum, desc: fetchedCourse.title}
-            courses.push(newCourse);
+            
             currentCoursesList.innerHTML += createCourseCard(newCourse);
 
             fetchedCourse = null;
@@ -561,7 +592,33 @@ document.getElementById('add-course-button').addEventListener('click',()=> {
             fetchAndFill("terms", { year: currentYear }, termSelect);
 
             allowedToAddCourse = false;
+            if (!(document.getElementById('add-course-button').classList.contains('inactive'))) {
+                document.getElementById('add-course-button').classList.add('inactive');
+            }
 
+
+            if (fetchedSchedule) {
+                let thisCourseCalendar = [];
+                fetchedSchedule.forEach(scheduledClass => {
+                    let daysAvailable = scheduledClass.days.split(', ');
+                    for (let i = 0; i<daysAvailable.length; i++) {
+                        currentScheduleCalendar = {
+                            "name": courseNum,
+                            "day": twoLetterDateToNumber(daysAvailable[i]),
+                            "startTime": scheduledClass.startTime,
+                            "endTime": scheduledClass.endTime
+                        };
+                        thisCourseCalendar.push(currentScheduleCalendar)
+                        calendar.push(currentScheduleCalendar)
+                    }
+                })
+                newCourse.calendar = thisCourseCalendar;
+
+                importEvents(calendar);
+                calendar = [];
+            }
+
+            courses.push(newCourse);
             saveCoursesToLocalStorage();
         }
     }
@@ -581,9 +638,6 @@ function deleteCourse(courseNum) {
 
 
 // Calendar
-const startHour = 8; // 8 AM
-const endHour = 20;  // 8 PM
-const totalMinutes = (endHour - startHour) * 60;
 
 function timeToMinutes(timeStr) {
     const [h, m] = timeStr.split(':').map(Number);
@@ -675,13 +729,6 @@ function importEvents(events) {
         }
     });
 }
-
-// Example import
-const exampleEvents = [
-    {"name": "Lecture", "day": 0, "startTime": "11:30", "endTime": "16:30"},
-    {"name": "Math", "day": 2, "startTime": "9:00", "endTime": "10:00"}
-];
-importEvents(exampleEvents);
 
 
 
