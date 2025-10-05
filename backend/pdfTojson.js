@@ -3,7 +3,7 @@ import pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
 const API_KEY = process.env.GEMINI_API_KEY;
 const MODEL = "gemini-2.5-flash";
 
-// Gemini call
+// Gemini API call
 async function callGemini(prompt, text) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 

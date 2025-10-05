@@ -7,7 +7,11 @@ export default async function quoteHandler(req, res) {
 
     const body = {
       contents: [
-        { parts: [{ text: "Give me a short, original motivational quote to inspire someone who needs to study. Say just the Quote." }] }
+        {
+          parts: [
+            { text: "Give me a short, original motivational quote to inspire someone who needs to study. Say just the Quote." }
+          ]
+        }
       ]
     };
 

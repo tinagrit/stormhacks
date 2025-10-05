@@ -2,7 +2,10 @@
   "name": "stormhacks2025",
   "version": "1.0.0",
   "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
-    "pdfjs-dist": "^5.4.149"
+    "pdfjs-dist": "^2.16.105"
   }
 }
