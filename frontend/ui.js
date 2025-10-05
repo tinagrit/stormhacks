@@ -9,12 +9,14 @@ let isPaused = false;
 let studyBlock = minToMs(25);
 let breakBlock = minToMs(10);
 
-let niceQuoteOfTheSession = " ";
+// fallback value in case API doesn't work
+let niceQuoteOfTheSession = "Engage your mind. Every discovery today fuels tomorrow's brilliance.";
+
 fetch('https://stormhacks.api.tinagrit.com/api/quote').then(res => {
     if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        throw new Error(`status: ${res.status}`);
     }
-    return res.json(); // parse response as JSON
+    return res.json();
 }).then(json => {
     niceQuoteOfTheSession = json.quote;
 })

@@ -2,7 +2,6 @@
 // Node.js + Express server for SFU Course Outlines API proxy
 
 const express = require("express");
-const cors = require("cors");
 const fetch = require("node-fetch");
 const path = require('path');
 
@@ -14,7 +13,7 @@ const PORT = process.env.PORT || 4000;
 const BASE_URL = "http://www.sfu.ca/bin/wcm/course-outlines";
 
 // Enable CORS so frontend (e.g., localhost:5173) can access it
-router.use(cors());
+// router.use(cors());
 
 // Optional: simple in-memory cache to reduce repeated API calls
 // cache[key] = { data, timestamp }
