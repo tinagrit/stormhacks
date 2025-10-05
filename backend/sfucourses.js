@@ -143,7 +143,7 @@ router.get("/outline", async (req, res) => {
       });
     }
 
-    res.json({ sem: `${term} ${year}`, info, events});
+    res.json({ sem: `${term} ${year}`, info, courseSchedule, events});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch course outline" });
