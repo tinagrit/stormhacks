@@ -27,7 +27,7 @@ app.post("/api/pdf", async (req, res) => {
 });
 
 // Route for Quote
-app.post("/api/quote", async (req, res) => {
+app.get("/api/quote", async (req, res) => {
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
     const body = {
