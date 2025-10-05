@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "pdf-parse": "^2.1.7"
+    "pdfjs-dist": "^5.4.149"
   }
 }
