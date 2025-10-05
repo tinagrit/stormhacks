@@ -3,9 +3,9 @@ import pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
 const API_KEY = process.env.GEMINI_API_KEY;
 const MODEL = "gemini-2.5-flash";
 
+// Gemini API call
 async function callGemini(prompt, text) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-
   const body = { contents: [{ parts: [{ text: `${prompt}\n\n${text}` }] }] };
 
   const response = await fetch(url, {
@@ -18,6 +18,7 @@ async function callGemini(prompt, text) {
   return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
 }
 
+// Extract text from PDF
 async function extractTextFromPdf(buffer) {
   const loadingTask = pdfjsLib.getDocument({ data: buffer });
   const pdf = await loadingTask.promise;
@@ -32,7 +33,8 @@ async function extractTextFromPdf(buffer) {
   return text;
 }
 
-export default async function pdfHandler(req, res) {
+// Serverless handler
+export default async function handler(req, res) {
   try {
     if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 

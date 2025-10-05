@@ -1,7 +1,7 @@
 const API_KEY = process.env.GEMINI_API_KEY;
 const MODEL = "gemini-2.5-flash";
 
-export default async function quoteHandler(req, res) {
+export default async function handler(req, res) {
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
@@ -19,6 +19,7 @@ export default async function quoteHandler(req, res) {
 
     const data = await response.json();
     const quote = data.candidates?.[0]?.content?.parts?.[0]?.text || "No quote generated.";
+
     res.status(200).json({ quote });
   } catch (err) {
     console.error(err);
