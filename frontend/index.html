@@ -65,6 +65,8 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
         }
 
         .nav-tabs {
@@ -100,6 +102,17 @@
         .nav-tab svg {
             width: 20px;
             height: 20px;
+        }
+
+        #arduino-connect {
+            display: flex;
+            flex-wrap: wrap;
+            align-content: center;
+            cursor: pointer;
+        }
+
+        #arduino-connect p {
+            height: fit-content;
         }
 
         #mainBackground {
@@ -422,8 +435,8 @@
                     Schedule
                 </button>
             </div>
-            <div class="arduino-connect">
-                Arduino
+            <div class="arduino-connect" id="arduino-connect">
+                <p class="text-muted">Arduino</p>
             </div>
         </div>
     </div>

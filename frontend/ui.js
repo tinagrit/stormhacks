@@ -9,6 +9,8 @@ let isPaused = false;
 let studyBlock = minToMs(25);
 let breakBlock = minToMs(10);
 
+let haveWorkingArduino = false;
+
 // fallback value in case API doesn't work
 let niceQuoteOfTheSession = "Engage your mind. Every discovery today fuels tomorrow's brilliance.";
 
@@ -48,6 +50,10 @@ loadTasksFromLocalStorage();
 
 
 
+
+
+// arduino
+document.getElementById('arduino-connect')
 
 
 
