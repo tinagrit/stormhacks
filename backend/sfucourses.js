@@ -42,6 +42,10 @@ async function cachedFetch(url) {
 // ROUTES
 // -----------------------------------------------------------------------------
 
+router.get("/", async (req,res)=> {
+  res.sendFile(path.join(__dirname, 'public_html', 'sfucourses.html'));
+})
+
 // 1️⃣ Get available years
 router.get("/years", async (req, res) => {
   try {
