@@ -1,6 +1,5 @@
 # Tomo
-
----
+Your fruity friend in helping you stay on track with LITERALLY everything!
 
 ## Inspiration
 
