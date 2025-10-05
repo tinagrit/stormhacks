@@ -120,8 +120,15 @@ function restartTimer() {
     requestAnimationFrame(tick);
 }
 
+let lastSentState = null;
+function sendCommandIfChanged(newState) {
+    if (lastSentState !== newState) {
+        sendCommand(newState);
+        lastSentState = newState;
+    }
+}
+
 function tick() {
-    console.log('ticking!');
     let now = Date.now();
     let elapsed = now - startTime;
     let timePassed = 0, state = 'study', timeInBlock = 0, blockIndex = 0;
@@ -165,6 +172,10 @@ function tick() {
             if (document.getElementById('mainBackground').classList.contains('break')) {
                 document.getElementById('mainBackground').classList.remove('break');
             }
+
+            if (haveWorkingArduino) {
+                sendCommandIfChanged("STUDY");
+            }
         } else {
             document.getElementById('session-phase').textContent = "Break";
             document.getElementById('current-interval').textContent = (blocks[blockIndex].duration / (1000*60)) + ' min';
@@ -172,12 +183,20 @@ function tick() {
             if (!(document.getElementById('mainBackground').classList.contains('break'))) {
                 document.getElementById('mainBackground').classList.add('break');
             }
+
+            if (haveWorkingArduino) {
+                sendCommandIfChanged("BREAK");
+            }
         }
     } else {
         document.getElementById('session-phase').textContent = "Session Ended";
         document.getElementById('mainBackground').classList.add('finished');
         document.getElementById('current-task-name').textContent = niceQuoteOfTheSession;
         document.getElementById('timer-control-buttons').classList.add('finished');
+
+        if (haveWorkingArduino) {
+            sendCommandIfChanged("FINISHED");
+        }
     }
 
     updateHTML();

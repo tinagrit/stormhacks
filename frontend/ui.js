@@ -53,7 +53,58 @@ loadTasksFromLocalStorage();
 
 
 // arduino
-document.getElementById('arduino-connect')
+let port;
+let writer;
+let reader;
+
+document.getElementById('arduino-connect').addEventListener('click',async ()=>{
+    try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
+
+        document.getElementById('arduino-connect').querySelector('p').innerHTML = 'Connected';
+        console.log('Connected to serial port.');
+
+        writer = port.writable.getWriter();
+
+        readLoop();
+
+        haveWorkingArduino = true;
+    } catch (err) {
+        document.getElementById('arduino-connect').querySelector('p').innerHTML = 'Failed';
+        console.log('Error: ' + err);
+    }
+})
+
+async function readLoop() {
+  const textDecoder = new TextDecoder();
+  reader = port.readable.getReader();
+
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break; // reader canceled
+      if (value) {
+        const text = textDecoder.decode(value);
+        console.log(text.trim());
+      }
+    }
+  } catch (error) {
+    console.log('Read error: ' + error);
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+async function sendCommand(cmd) {
+  if (!writer) {
+    console.log('Not connected!');
+    return;
+  }
+  const data = new TextEncoder().encode(cmd + "\n");
+  await writer.write(data);
+  console.log('Sent: ' + cmd);
+}
 
 
 
