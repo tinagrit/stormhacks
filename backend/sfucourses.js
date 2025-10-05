@@ -117,9 +117,8 @@ router.get("/outline", async (req, res) => {
   try {
     const data = await cachedFetch(`${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(term)}/${encodeURIComponent(dept)}/${encodeURIComponent(course)}/${encodeURIComponent(section)}`);
     const courseSchedule = data.courseSchedule;
-    const info = data.info;
 
-    console.log(courseSchedule);
+    // console.log(courseSchedule);
 
     // Prepare JSON object
     const appendID = appendCounter++;
@@ -129,21 +128,31 @@ router.get("/outline", async (req, res) => {
     // SFU API usually has a 'meetings' array for section events
     if (data.courseSchedule) {
       data.courseSchedule.forEach(ev => {
-        // TODO: for however many of each weekday, keep going from range start date to end date 
-        const calcStartEpoch = new Date(`${"2025-09-03"}T${ev.startTime}:00`).getTime();
-        const calcEndEpoch = new Date(`${"2025-09-03"}T${ev.endTime}:00`).getTime();
-        events.push({
-          ID: appendID,
-          subID: subID++,
-          type: ev.sectionCode || "",
-          startEpoch: calcStartEpoch,
-          endEpoch: calcEndEpoch,
-          elapsed: calcEndEpoch - calcStartEpoch
-        });
+        // Usage
+        const startDate = ev.startDate;
+        const endDate = ev.endDate;
+        const daysOfWeek = ev.days;  
+
+        const classDays = getDatesBetween(startDate, endDate, daysOfWeek);
+        
+        classDays.forEach(day => {
+          const dateOnly = day.toISOString().split("T")[0];
+          const calcStartEpoch = new Date(`${dateOnly}T${normalizeTime(ev.startTime)}:00`).getTime();
+          const calcEndEpoch = new Date(`${dateOnly}T${normalizeTime(ev.endTime)}:00`).getTime();
+
+          events.push({
+            ID: appendID,
+            subID: subID++,
+            type: ev.sectionCode || "",
+            startEpoch: calcStartEpoch,
+            endEpoch: calcEndEpoch,
+            elapsed: calcEndEpoch - calcStartEpoch
+          });
+        })
       });
     }
 
-    res.json({ sem: `${term} ${year}`, info, courseSchedule, events});
+    res.json({ sem: `${term} ${year}`, events});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch course outline" });
@@ -151,3 +160,47 @@ router.get("/outline", async (req, res) => {
 });
 
 module.exports = router;
+
+// Function to iterate through dates and return matching days (We, Fr)
+function getDatesBetween(startDateStr, endDateStr, days) {
+    const startDate = new Date(startDateStr); // Parse the start date
+    const endDate = new Date(endDateStr); // Parse the end date
+
+    const daysOfWeek = {  // Mapping for day names to number
+        "Su": 0,
+        "Mo": 1,
+        "Tu": 2,
+        "We": 3,
+        "Th": 4,
+        "Fr": 5,
+        "Sa": 6
+    };
+
+    // Split the `days` string and convert to an array of day numbers
+    const targetDays = days.split(',').map(day => day.trim()).map(day => daysOfWeek[day]);
+
+    let dates = [];
+    let currentDate = new Date(startDate);
+
+    // Loop through all dates from startDate to endDate
+    while (currentDate <= endDate) {
+        // If the current day matches one of the target days, add it to the list
+        if (targetDays.includes(currentDate.getDay())) {
+            dates.push(new Date(currentDate));  // Store a copy of the date
+        }
+        currentDate.setDate(currentDate.getDate() + 1);  // Increment by one day
+    }
+
+    return dates;
+}
+
+function normalizeTime(t) {
+  // Handles "9:30" → "09:30", "10:05" → "10:05"
+  const [h, m] = t.split(":");
+  return `${h.padStart(2, "0")}:${m}`;
+}
+
+
+
+
+
