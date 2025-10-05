@@ -1,29 +1,22 @@
-// backend/index.js
+import pdfHandler from "./pdfToJson.js";
+import quoteHandler from "./quote.js";
+
 export default async function handler(req, res) {
   try {
     console.log("Request received:", req.method, req.url);
 
-    // Only allow POST
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method not allowed. Use POST." });
     }
 
-    // Normalize URL (remove query params)
-    const pathname = req.url.split("?")[0];
-
-    // Route /api/pdf
-    if (pathname === "/api/pdf") {
-      const { default: pdfHandler } = await import("./pdfToJson.js");
+    // Use Vercel routes to decide which handler
+    if (req.url === "/api/pdf") {
       return pdfHandler(req, res);
     }
-
-    // Route /api/quote
-    if (pathname === "/api/quote") {
-      const { default: quoteHandler } = await import("./quote.js");
+    if (req.url === "/api/quote") {
       return quoteHandler(req, res);
     }
 
-    // Fallback
     res.status(404).json({ error: "Not found" });
   } catch (err) {
     console.error("Handler error:", err);
