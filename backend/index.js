@@ -6,8 +6,11 @@ import quoteHandler from "./quote.js";
 const app = express();
 app.use(express.json());
 
-// Routes
+// PDF endpoint (POST only)
 app.post("/api/pdf", pdfHandler);
+
+// Quote endpoint (GET + POST)
+app.get("/api/quote", quoteHandler);
 app.post("/api/quote", quoteHandler);
 
 // Catch-all
