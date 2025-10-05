@@ -8,12 +8,12 @@ const fetch = require("node-fetch");
 // -----------------------------------------------------------------------------
 // CONFIGURATION
 // -----------------------------------------------------------------------------
-const app = express();
+const router = express.Router();
 const PORT = process.env.PORT || 4000;
 const BASE_URL = "http://www.sfu.ca/bin/wcm/course-outlines";
 
 // Enable CORS so frontend (e.g., localhost:5173) can access it
-app.use(cors());
+router.use(cors());
 
 // Optional: simple in-memory cache to reduce repeated API calls
 // cache[key] = { data, timestamp }
@@ -43,7 +43,7 @@ async function cachedFetch(url) {
 // -----------------------------------------------------------------------------
 
 // 1️⃣ Get available years
-app.get("/years", async (req, res) => {
+router.get("/years", async (req, res) => {
   try {
     const url = BASE_URL;
     const data = await cachedFetch(url);
@@ -55,7 +55,7 @@ app.get("/years", async (req, res) => {
 });
 
 // 2️⃣ Get available terms for a year
-app.get("/terms", async (req, res) => {
+router.get("/terms", async (req, res) => {
   const year = (req.query.year || "").trim();
   if (!year) return res.status(400).json({ error: "Missing ?year parameter" });
 
@@ -70,7 +70,7 @@ app.get("/terms", async (req, res) => {
 });
 
 // 3️⃣ Get departments for a given year + term
-app.get("/departments", async (req, res) => {
+router.get("/departments", async (req, res) => {
   const { year = "", term = "" } = req.query;
   if (!year || !term)
     return res.status(400).json({ error: "Missing ?year or ?term parameter" });
@@ -88,7 +88,7 @@ app.get("/departments", async (req, res) => {
 });
 
 // 4️⃣ Get course numbers for a department
-app.get("/courses", async (req, res) => {
+router.get("/courses", async (req, res) => {
   const { year = "", term = "", dept = "" } = req.query;
   if (!year || !term || !dept)
     return res
@@ -108,7 +108,7 @@ app.get("/courses", async (req, res) => {
 });
 
 // 5️⃣ Get sections for a specific course
-app.get("/sections", async (req, res) => {
+router.get("/sections", async (req, res) => {
   const { year = "", term = "", dept = "", course = "" } = req.query;
   if (!year || !term || !dept || !course)
     return res
@@ -128,7 +128,7 @@ app.get("/sections", async (req, res) => {
 });
 
 // (optional) 6️⃣ Get specific section outline
-app.get("/outline", async (req, res) => {
+router.get("/outline", async (req, res) => {
   const { year = "", term = "", dept = "", course = "", section = "" } =
     req.query;
   if (!year || !term || !dept || !course || !section)
@@ -150,9 +150,4 @@ app.get("/outline", async (req, res) => {
   }
 });
 
-// -----------------------------------------------------------------------------
-// START SERVER
-// -----------------------------------------------------------------------------
-app.listen(PORT, () => {
-  console.log(`✅ SFU Course Outlines proxy running on http://localhost:${PORT}`);
-});
+module.exports = router;

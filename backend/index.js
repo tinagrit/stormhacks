@@ -3,6 +3,8 @@ const express = require("express");
 const serverless = require("serverless-http");
 const cors = require("cors");
 
+const sfucoursesRouter = require("./sfucourses");
+
 const app = express();
 
 const API_KEY = process.env.GEMINI_API_KEY;
@@ -48,6 +50,8 @@ app.get("/api/quote", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+app.use("/api/sfucourses", sfucoursesRouter);
 
 // Catch-all for other routes
 app.use((req, res) => {
