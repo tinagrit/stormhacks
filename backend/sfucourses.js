@@ -44,9 +44,7 @@ let appendCounter = 0;
 
 // --- Routes ---
 
-router.use(cors({
-  origin: "https://stormhacks.tinagrit.com"
-}))
+router.use(cors())
 
 router.get("/years", async (req, res) => {
   try {

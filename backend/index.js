@@ -13,9 +13,7 @@ const MODEL = "gemini-2.5-flash";
 // Middleware to parse JSON
 app.use(express.json());
 
-app.use(cors({
-  origin: "https://stormhacks.tinagrit.com"
-}))
+app.use(cors())
 
 // Route for PDF
 app.post("/api/pdf", async (req, res) => {
