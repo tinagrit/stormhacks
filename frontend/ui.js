@@ -236,7 +236,10 @@ function openEditModal(taskId) {
     if (parseInt(taskId) == -1) {
         currentlyAddingTask = true;
         document.getElementById('editTaskModalTitle').innerHTML = "Add Task";
-        currentEditTaskId = String(parseInt(tasks[tasks.length-1].id)+1);
+        currentEditTaskId = '0';
+        if (tasks.length > 0) {
+            currentEditTaskId = String(parseInt(tasks[tasks.length-1].id)+1);
+        }
         task = {
             id: currentEditTaskId,
             title: '', 

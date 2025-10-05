@@ -287,6 +287,12 @@
             font-size: 6rem;
         }
 
+        #timer-control-buttons.finished button {
+            background-color: #2a2a2a;
+            border-color: #0a0a0a;
+            cursor: not-allowed;
+        }
+
         /* Task Item */
         .task-item {
             padding: 1rem;
@@ -662,7 +668,7 @@
                 </div>
 
                 <!-- Add Time Button -->
-                <div class="text-center mb-6">
+                <div class="text-center mb-6" id="timer-control-buttons">
                     <button class="btn btn-lg" id="add-time-btn">
                         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>

@@ -177,6 +177,7 @@ function tick() {
         document.getElementById('session-phase').textContent = "Session Ended";
         document.getElementById('mainBackground').classList.add('finished');
         document.getElementById('current-task-name').textContent = niceQuoteOfTheSession;
+        document.getElementById('timer-control-buttons').classList.add('finished');
     }
 
     updateHTML();
