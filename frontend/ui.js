@@ -2,6 +2,15 @@ const minToMs = (minutes) => {
     return minutes * 60 * 1000;
 };
 
+let currentEditTaskId = null;
+
+let isPaused = false;
+
+let studyBlock = minToMs(25);
+let breakBlock = minToMs(10);
+
+
+// local storage
 let tasks = [
     { id: '1', title: 'Complete Math Assignment', description: 'Chapter 5 problems 1-20', timeNeeded: 60, priority: 80, dueDate: '2025-10-08'},
     { id: '2', title: 'Read Chapter 5 - Biology', description: 'Cell structure and functions', timeNeeded: 60,  priority: 60, dueDate: '2025-10-10'},
@@ -9,12 +18,21 @@ let tasks = [
     { id: '4', title: 'Review Lecture Notes', description: 'Review all week notes', timeNeeded: 60,  priority: 40, dueDate: '2025-10-15'}
 ];
 
-let currentEditTaskId = null;
+function saveTasksToLocalStorage() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
 
-let isPaused = false;
-
-let studyBlock = minToMs(25);
-let breakBlock = minToMs(10);
+function loadTasksFromLocalStorage() {
+    const storedTasks = localStorage.getItem('tasks');
+    if (storedTasks) {
+        try {
+            tasks = JSON.parse(storedTasks);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+}
+loadTasksFromLocalStorage();
 
 
 
@@ -97,7 +115,7 @@ function renderTasks() {
                             <label style="font-size: 0.875rem;" class="text-muted">Time needed</label>
                             <span style="font-size: 0.875rem;" class="text-primary" id="time-value-for-${task.id}">60 min</span>
                         </div>
-                        <input type="range" class="slider" min="10" max="120" step="1" value="60" oninput="updateCurrentTask('${task.id}', this.value)">
+                        <input type="range" class="slider" min="1" max="120" step="1" value="60" oninput="updateCurrentTask('${task.id}', this.value)">
                     </div>
                 </div>
             </div>
@@ -269,6 +287,7 @@ document.getElementById('save-edit-btn').addEventListener('click', () => {
         });
         renderTasks();
         renderTasksPage();
+        saveTasksToLocalStorage();
         document.getElementById('edit-task-modal').classList.remove('show');
     }
 });

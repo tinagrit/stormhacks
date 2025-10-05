@@ -55,6 +55,8 @@ function recalculateBlocks() {
         }
     }
     if (totalTime < 0) totalTime = 0;
+
+    assignTasksToStudyBlocks();
 }
 
 function assignTasksToStudyBlocks() {
@@ -145,6 +147,21 @@ function tick() {
             document.getElementById('session-phase').textContent = "Study";
             document.getElementById('current-interval').textContent = (blocks[blockIndex].duration / (1000*60)) + ' min';
             document.getElementById('current-interval').textContent += " (Study)"
+
+            // Show which task (or part of a task) applies to this position in block
+            let studyTasks = blocks[blockIndex].tasks || [];
+            let taskPointer = 0, subElapsed = 0, taskText = "";
+            for (let seg of studyTasks) {
+                if (timeInBlock < subElapsed + seg.time) {
+                    // In this slice
+                    let taskTimeLeft = Math.ceil((seg.time - (timeInBlock - subElapsed))/1000/60);
+                    taskText = seg.name;
+                    break;
+                }
+                subElapsed += seg.time;
+            }
+            document.getElementById('current-task-name').textContent = taskText;
+
             if (document.getElementById('mainBackground').classList.contains('break')) {
                 document.getElementById('mainBackground').classList.remove('break');
             }
