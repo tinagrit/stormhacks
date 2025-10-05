@@ -26,10 +26,10 @@ fetch('https://stormhacks.api.tinagrit.com/api/quote').then(res => {
 
 // local storage
 let tasks = [
-    { id: '1', title: 'Complete Math Assignment', description: 'Chapter 5 problems 1-20', timeNeeded: 60, priority: 80, dueDate: '2025-10-08'},
-    { id: '2', title: 'Read Chapter 5 - Biology', description: 'Cell structure and functions', timeNeeded: 60,  priority: 60, dueDate: '2025-10-10'},
-    { id: '3', title: 'Prepare for Quiz', description: 'Physics mechanics review', timeNeeded: 60,  priority: 90, dueDate: '2025-10-12'},
-    { id: '4', title: 'Review Lecture Notes', description: 'Review all week notes', timeNeeded: 60,  priority: 40, dueDate: '2025-10-15'}
+    { id: '1', title: 'Complete Assignment 8', description: 'Long Assignment 8 Simple Shell', course: 'CMPT 201', timeNeeded: 60, priority: 80, dueDate: '2025-10-08'},
+    { id: '2', title: 'Finish Quiz 12', description: 'Non-Coelurosaur Theropods', course: 'EASC 103', timeNeeded: 60,  priority: 50, dueDate: '2025-10-10'},
+    { id: '3', title: 'Start Assignment 2', description: 'Check Canvas', course: 'CMPT 225', timeNeeded: 60,  priority: 60, dueDate: '2025-10-12'},
+    { id: '4', title: 'Work on Lab 5', description: 'Details on course website', course: 'CMPT 201', timeNeeded: 60,  priority: 40, dueDate: '2025-10-15'}
 ];
 
 let courses = [
@@ -43,6 +43,11 @@ function saveTasksToLocalStorage() {
 }
 
 function saveCoursesToLocalStorage() {
+    document.getElementById('edit-task-course').innerHTML = "";
+    courses.forEach(course => {
+        document.getElementById('edit-task-course').innerHTML += `<option value='${course.num}'>${course.num}</option>`
+    })
+
     localStorage.setItem('courses', JSON.stringify(courses));
 }
 
@@ -173,6 +178,7 @@ const previewTime = document.getElementById('preview-time');
 studyTimeSlider.addEventListener('input', () => {
     studyBlock = parseInt(studyTimeSlider.value);
     studyTimeValue.innerHTML = studyBlock + ' min';
+    if (studyBlock == 0) studyBlock = 0.1;
     studyBlock = minToMs(studyBlock);
     calculateAndPreview();
 });
@@ -180,6 +186,7 @@ studyTimeSlider.addEventListener('input', () => {
 breakTimeSlider.addEventListener('input', () => {
     breakBlock = parseInt(breakTimeSlider.value);
     breakTimeValue.innerHTML = breakBlock + ' min';
+    if (breakBlock == 0) breakBlock = 0.05;
     breakBlock = minToMs(breakBlock);
     calculateAndPreview();
 });
@@ -202,7 +209,7 @@ function renderTasks() {
                 <input type="checkbox" class="checkbox" onchange="toggleTaskTime(${task.id})">
                 <div class="w-full">
                     <div class="flex justify-between items-center mb-2" style="flex-wrap: wrap; gap: 0.5rem;">
-                        <p style="flex: 1;">${task.title}</p>
+                        <p style="flex: 1;">${task.course} - ${task.title}</p>
                         <span class="badge ${getPriorityClass(task.priority)}">${getPriorityLabel(task.priority)}</span>
                     </div>
                     <div class="mb-2 timeNeeded" id="time-needed-for-${task.id}">
@@ -210,7 +217,7 @@ function renderTasks() {
                             <label style="font-size: 0.875rem;" class="text-muted">Time needed</label>
                             <span style="font-size: 0.875rem;" class="text-primary" id="time-value-for-${task.id}">60 min</span>
                         </div>
-                        <input type="range" class="slider" min="1" max="120" step="1" value="60" oninput="updateCurrentTask('${task.id}', this.value)">
+                        <input type="range" class="slider" min="0" max="120" step="1" value="60" oninput="updateCurrentTask('${task.id}', this.value)">
                     </div>
                 </div>
             </div>
@@ -235,6 +242,7 @@ function toggleTaskTime(taskId) {
 
 function updateCurrentTask(taskId, newTime) {
     newValue = parseInt(newTime);
+    if (newValue == 0) newValue = 0.2;
 
     tasks.forEach(task => {
         if (task.id == taskId) {
@@ -242,7 +250,7 @@ function updateCurrentTask(taskId, newTime) {
         }
     })
 
-    document.getElementById('time-value-for-'+taskId).innerHTML = newValue + ' min';
+    document.getElementById('time-value-for-'+taskId).innerHTML = Math.floor(newValue) + ' min';
 
     updateTaskTime();
 }
@@ -256,7 +264,7 @@ function updateTaskTime() {
             }
         })
     });
-    document.getElementById('total-time-value').innerHTML = studyTime + ' min';
+    document.getElementById('total-time-value').innerHTML = Math.floor(studyTime) + ' min';
     studyTime = minToMs(studyTime);
     calculateAndPreview();
 }
@@ -290,7 +298,7 @@ function createTaskCard(task) {
             <div class="flex justify-between gap-4" style="align-items: flex-start;">
                 <div style="flex: 1;">
                     <div class="flex items-center gap-3 mb-2" style="flex-wrap: wrap;">
-                        <h4>${task.title}</h4>
+                        <h4>${task.course} - ${task.title}</h4>
                         <span class="badge ${getPriorityClass(task.priority)}">${getPriorityLabel(task.priority)}</span>
                     </div>
                     <p class="text-muted mb-2">${task.description}</p>
@@ -378,6 +386,7 @@ document.getElementById('save-edit-btn').addEventListener('click', () => {
                     title: document.getElementById('edit-task-title').value,
                     description: document.getElementById('edit-task-description').value,
                     dueDate: document.getElementById('edit-task-due-date').value,
+                    course: document.getElementById('edit-task-course').value,
                     priority: parseInt(document.getElementById('edit-priority-slider').value)
                 };
             }
@@ -404,6 +413,12 @@ function createCourseCard(course) {
                     </div>
                     <p class="text-muted mb-2">${course.desc}</p>
                 </div>
+                <button class="btn" onclick="deleteCourse('${course.num}')">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6l12 12M6 18L18 6"></path>
+                    </svg>
+                    Delete
+                </button>
             </div>
         </div>
     `;
@@ -414,6 +429,10 @@ function renderCoursesList() {
     const currentCourses = courses;
 
     currentCoursesList.innerHTML = currentCourses.map(course => createCourseCard(course)).join('');
+    document.getElementById('edit-task-course').innerHTML = "";
+    courses.forEach(course => {
+        document.getElementById('edit-task-course').innerHTML += `<option value='${course.num}'>${course.num}</option>`
+    })
 }
 
 const backend = "https://stormhacks.api.tinagrit.com/api/sfucourses/";
@@ -547,6 +566,17 @@ document.getElementById('add-course-button').addEventListener('click',()=> {
         }
     }
 })
+
+function deleteCourse(courseNum) {
+    for (let i=0; i<courses.length; i++) {
+        if (courses[i].num == courseNum) {
+            courses.splice(i,1);
+            saveCoursesToLocalStorage();
+            renderCoursesList();
+            break;
+        }
+    }
+}
 
 
 
