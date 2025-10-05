@@ -7,11 +7,7 @@ export default async function quoteHandler(req, res) {
 
     const body = {
       contents: [
-        {
-          parts: [
-            { text: "Give me a short, original motivational quote to inspire someone who needs to study. Say just the Quote." }
-          ]
-        }
+        { parts: [{ text: "Give me a short, original motivational quote to inspire someone who needs to study. Just the quote." }] }
       ]
     };
 
@@ -23,7 +19,6 @@ export default async function quoteHandler(req, res) {
 
     const data = await response.json();
     const quote = data.candidates?.[0]?.content?.parts?.[0]?.text || "No quote generated.";
-
     res.status(200).json({ quote });
   } catch (err) {
     console.error(err);
