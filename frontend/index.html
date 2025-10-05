@@ -181,8 +181,8 @@
                 </div>
             </div>
 
-            <div class="card" style="overflow-x: auto;">
-                <table class="schedule-table">
+            <div class="card calendar" style="overflow-x: auto;">
+                <!-- <table class="schedule-table">
                     <thead>
                         <tr>
                             <th>Time</th>
@@ -196,11 +196,39 @@
                         </tr>
                     </thead>
                     <tbody id="schedule-body"></tbody>
-                </table>
+                </table> -->
+                <div class="day">
+                    <div class="day-header">Sunday</div>
+                    <div class="time-slots" data-day="0"></div>
+                </div>
+                <div class="day">
+                    <div class="day-header">Monday</div>
+                    <div class="time-slots" data-day="1"></div>
+                </div>
+                <div class="day">
+                    <div class="day-header">Tuesday</div>
+                    <div class="time-slots" data-day="2"></div>
+                </div>
+                <div class="day">
+                    <div class="day-header">Wednesday</div>
+                    <div class="time-slots" data-day="3"></div>
+                </div>
+                <div class="day">
+                    <div class="day-header">Thursday</div>
+                    <div class="time-slots" data-day="4"></div>
+                </div>
+                <div class="day">
+                    <div class="day-header">Friday</div>
+                    <div class="time-slots" data-day="5"></div>
+                </div>
+                <div class="day">
+                    <div class="day-header">Saturday</div>
+                    <div class="time-slots" data-day="6"></div>
+                </div>
             </div>
 
             <p class="text-center text-muted mt-4" style="font-size: 0.875rem;">
-                Click on any time slot to add an event (feature coming soon)
+                Click and drag to block time
             </p>
         </div>
     </div>

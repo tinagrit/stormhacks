@@ -580,28 +580,133 @@ function deleteCourse(courseNum) {
 
 
 
+// Calendar
+const startHour = 8; // 8 AM
+const endHour = 20;  // 8 PM
+const totalMinutes = (endHour - startHour) * 60;
+
+function timeToMinutes(timeStr) {
+    const [h, m] = timeStr.split(':').map(Number);
+    return (h - startHour) * 60 + m;
+}
+
+function minutesToPercent(minutes) {
+    return (minutes / totalMinutes) * 100;
+}
+
+function createTimeBlock(dayDiv, startMins, endMins, text) {
+    const block = document.createElement('div');
+    block.classList.add('time-block');
+    block.style.top = minutesToPercent(startMins) + '%';
+    block.style.height = minutesToPercent(endMins - startMins) + '%';
+    block.textContent = text || '';
+    dayDiv.appendChild(block);
+}
+
+let isDragging = false;
+let dragStartY = 0;
+let currentDayDiv = null;
+let dragBlock = null;
+
+const timeSlots = document.querySelectorAll('.time-slots');
+
+timeSlots.forEach(dayDiv => {
+    dayDiv.addEventListener('mousedown', e => {
+        isDragging = true;
+        currentDayDiv = e.currentTarget;
+        const rect = currentDayDiv.getBoundingClientRect();
+        dragStartY = e.clientY - rect.top;
+
+        dragBlock = document.createElement('div');
+        dragBlock.classList.add('time-block');
+        dragBlock.style.top = dragStartY + 'px';
+        dragBlock.style.height = '0px';
+        currentDayDiv.appendChild(dragBlock);
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (!isDragging || !currentDayDiv) return;
+        const rect = currentDayDiv.getBoundingClientRect();
+        let dragCurrentY = e.clientY - rect.top;
+        let top = Math.min(dragStartY, dragCurrentY);
+        let bottom = Math.max(dragStartY, dragCurrentY);
+        dragBlock.style.top = top + 'px';
+        dragBlock.style.height = (bottom - top) + 'px';
+    });
+
+    document.addEventListener('mouseup', e => {
+        if (!isDragging || !currentDayDiv) return;
+        const rect = currentDayDiv.getBoundingClientRect();
+        const dayHeight = rect.height;
+        let topPx = parseFloat(dragBlock.style.top);
+        let heightPx = parseFloat(dragBlock.style.height);
+
+        let startPercent = topPx / dayHeight;
+        let endPercent = (topPx + heightPx) / dayHeight;
+
+        startPercent = Math.min(Math.max(startPercent, 0), 1);
+        endPercent = Math.min(Math.max(endPercent, 0), 1);
+
+        let startMins = startPercent * totalMinutes;
+        let endMins = endPercent * totalMinutes;
+
+        if (endMins - startMins < 5) {
+            dragBlock.remove();
+        } else {
+            startMins = Math.round(startMins / 5) * 5;
+            endMins = Math.round(endMins / 5) * 5;
+            dragBlock.style.top = minutesToPercent(startMins) + '%';
+            dragBlock.style.height = minutesToPercent(endMins - startMins) + '%';
+        }
+
+        isDragging = false;
+        currentDayDiv = null;
+        dragBlock = null;
+    });
+});
+
+function importEvents(events) {
+    events.forEach(event => {
+        const daySlots = document.querySelector('.time-slots[data-day="' + event.day + '"]');
+        if (daySlots) {
+            const startMins = timeToMinutes(event.startTime);
+            const endMins = timeToMinutes(event.endTime);
+            createTimeBlock(daySlots, startMins, endMins, event.name);
+        }
+    });
+}
+
+// Example import
+const exampleEvents = [
+    {"name": "Lecture", "day": 0, "startTime": "11:30", "endTime": "16:30"},
+    {"name": "Math", "day": 2, "startTime": "9:00", "endTime": "10:00"}
+];
+importEvents(exampleEvents);
+
+
+
 
 // Schedule
-function renderSchedule() {
-    const scheduleBody = document.getElementById('schedule-body');
-    const hours = Array.from({ length: 14 }, (_, i) => i + 8); // 8 AM to 9 PM
+// function renderSchedule() {
+//     const scheduleBody = document.getElementById('schedule-body');
+//     const hours = Array.from({ length: 14 }, (_, i) => i + 8); // 8 AM to 9 PM
     
-    scheduleBody.innerHTML = hours.map(hour => {
-        const timeLabel = hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 AM`;
-        return `
-            <tr>
-                <td style="background-color: rgba(31, 31, 31, 0.3);">${timeLabel}</td>
-                <td>${hour === 10 ? '<div class="schedule-event"><p>CMPT 120 Lecture</p><p style="font-size: 0.75rem; color: var(--muted);">10:00 AM</p></div>' : ''}</td>
-                <td>${hour === 13 ? '<div class="schedule-event" style="background-color: rgba(239, 68, 68, 0.2); border-left-color: #ef4444;"><p>Math Tutorial</p><p style="font-size: 0.75rem; color: var(--muted);">1:00 PM</p></div>' : ''}</td>
-                <td>${hour === 10 ? '<div class="schedule-event"><p>CMPT 120 Lecture</p><p style="font-size: 0.75rem; color: var(--muted);">10:00 AM</p></div>' : ''}</td>
-                <td>${hour === 13 ? '<div class="schedule-event" style="background-color: rgba(239, 68, 68, 0.2); border-left-color: #ef4444;"><p>Math Tutorial</p><p style="font-size: 0.75rem; color: var(--muted);">1:00 PM</p></div>' : ''}</td>
-                <td>${hour === 15 ? '<div class="schedule-event" style="background-color: rgba(185, 28, 28, 0.3); border-left-color: #b91c1c;"><p>Group Project</p><p style="font-size: 0.75rem; color: var(--muted);">3:00 PM</p></div>' : ''}</td>
-                <td></td>
-                <td></td>
-            </tr>
-        `;
-    }).join('');
-}
+//     scheduleBody.innerHTML = hours.map(hour => {
+//         const timeLabel = hour > 12 ? `${hour - 12}:00 PM` : `${hour}:00 AM`;
+//         return `
+//             <tr>
+//                 <td style="background-color: rgba(31, 31, 31, 0.3);">${timeLabel}</td>
+//                 <td>${hour === 10 ? '<div class="schedule-event"><p>CMPT 120 Lecture</p><p style="font-size: 0.75rem; color: var(--muted);">10:00 AM</p></div>' : ''}</td>
+//                 <td>${hour === 13 ? '<div class="schedule-event" style="background-color: rgba(239, 68, 68, 0.2); border-left-color: #ef4444;"><p>Math Tutorial</p><p style="font-size: 0.75rem; color: var(--muted);">1:00 PM</p></div>' : ''}</td>
+//                 <td>${hour === 10 ? '<div class="schedule-event"><p>CMPT 120 Lecture</p><p style="font-size: 0.75rem; color: var(--muted);">10:00 AM</p></div>' : ''}</td>
+//                 <td>${hour === 13 ? '<div class="schedule-event" style="background-color: rgba(239, 68, 68, 0.2); border-left-color: #ef4444;"><p>Math Tutorial</p><p style="font-size: 0.75rem; color: var(--muted);">1:00 PM</p></div>' : ''}</td>
+//                 <td>${hour === 15 ? '<div class="schedule-event" style="background-color: rgba(185, 28, 28, 0.3); border-left-color: #b91c1c;"><p>Group Project</p><p style="font-size: 0.75rem; color: var(--muted);">3:00 PM</p></div>' : ''}</td>
+//                 <td></td>
+//                 <td></td>
+//             </tr>
+//         `;
+//     }).join('');
+// }
 
 // Timer Session
 document.getElementById('start-session-btn').addEventListener('click', () => {
@@ -655,4 +760,4 @@ function updateSessionDisplay() {
 renderTasks();
 renderTasksPage();
 renderCoursesList();
-renderSchedule();
+// renderSchedule();

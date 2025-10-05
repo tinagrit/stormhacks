@@ -385,6 +385,48 @@ textarea {
     text-align: left;
 }
 
+
+/* Calendar */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #ccc;
+    height: 600px;
+    user-select: none;
+}
+.day {
+    background: white;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    position: relative;
+}
+.day-header {
+    padding: 10px;
+    background: #f0f0f0;
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+}
+.time-slots {
+    flex: 1;
+    position: relative;
+    cursor: crosshair;
+}
+.time-block {
+    position: absolute;
+    left: 10%;
+    width: 80%;
+    background-color: rgba(0, 128, 255, 0.7);
+    border-radius: 4px;
+    color: white;
+    font-size: 12px;
+    padding: 2px 5px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
 /* Utility Classes */
 .text-primary { color: var(--primary); }
 .text-muted { color: var(--muted); }
