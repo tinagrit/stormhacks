@@ -3,10 +3,10 @@ const minToMs = (minutes) => {
 };
 
 let tasks = [
-    { id: '1', title: 'Complete Math Assignment', description: 'Chapter 5 problems 1-20', timeNeeded: 60, priority: 80, dueDate: '2025-10-08', status: 'current' },
-    { id: '2', title: 'Read Chapter 5 - Biology', description: 'Cell structure and functions', timeNeeded: 60,  priority: 60, dueDate: '2025-10-10', status: 'current' },
-    { id: '3', title: 'Prepare for Quiz', description: 'Physics mechanics review', timeNeeded: 60,  priority: 90, dueDate: '2025-10-12', status: 'future' },
-    { id: '4', title: 'Review Lecture Notes', description: 'Review all week notes', timeNeeded: 60,  priority: 40, dueDate: '2025-10-15', status: 'future' }
+    { id: '1', title: 'Complete Math Assignment', description: 'Chapter 5 problems 1-20', timeNeeded: 60, priority: 80, dueDate: '2025-10-08'},
+    { id: '2', title: 'Read Chapter 5 - Biology', description: 'Cell structure and functions', timeNeeded: 60,  priority: 60, dueDate: '2025-10-10'},
+    { id: '3', title: 'Prepare for Quiz', description: 'Physics mechanics review', timeNeeded: 60,  priority: 90, dueDate: '2025-10-12'},
+    { id: '4', title: 'Review Lecture Notes', description: 'Review all week notes', timeNeeded: 60,  priority: 40, dueDate: '2025-10-15'}
 ];
 
 let currentEditTaskId = null;
@@ -39,6 +39,16 @@ function showPage(pageName) {
     document.getElementById(`page-${pageName}`).classList.remove('hidden');
 }
 
+const calculateAndPreview = () => {
+    recalculateBlocks();
+    previewTime.innerHTML = Math.floor(totalTime / (1000*60)) + ' min'
+    if (totalTime > 0) {
+        document.getElementById('start-session-btn').classList.remove('inactive');
+    } else {
+        document.getElementById('start-session-btn').classList.add('inactive');
+    }
+}
+
 // Time Configuration
 const studyTimeSlider = document.getElementById('study-time-slider');
 const breakTimeSlider = document.getElementById('break-time-slider');
@@ -51,16 +61,14 @@ studyTimeSlider.addEventListener('input', () => {
     studyBlock = parseInt(studyTimeSlider.value);
     studyTimeValue.innerHTML = studyBlock + ' min';
     studyBlock = minToMs(studyBlock);
-    recalculateBlocks();
-    previewTime.innerHTML = Math.floor(totalTime / (1000*60)) + ' min'
+    calculateAndPreview();
 });
 
 breakTimeSlider.addEventListener('input', () => {
     breakBlock = parseInt(breakTimeSlider.value);
     breakTimeValue.innerHTML = breakBlock + ' min';
     breakBlock = minToMs(breakBlock);
-    recalculateBlocks();
-    previewTime.innerHTML = Math.floor(totalTime / (1000*60)) + ' min'
+    calculateAndPreview();
 });
 
 // Task Management
@@ -137,8 +145,7 @@ function updateTaskTime() {
     });
     document.getElementById('total-time-value').innerHTML = studyTime + ' min';
     studyTime = minToMs(studyTime);
-    recalculateBlocks();
-    previewTime.innerHTML = (Math.floor(totalTime / (1000*60))) + ' min'
+    calculateAndPreview();
 }
 
 function getPriorityLabel(priority) {
@@ -158,13 +165,10 @@ function getPriorityClass(priority) {
 // Tasks Page
 function renderTasksPage() {
     const currentTasksList = document.getElementById('current-tasks-list');
-    const futureTasksList = document.getElementById('future-tasks-list');
 
-    const currentTasks = tasks.filter(t => t.status === 'current');
-    const futureTasks = tasks.filter(t => t.status === 'future');
+    const currentTasks = tasks;
 
     currentTasksList.innerHTML = currentTasks.map(task => createTaskCard(task)).join('');
-    futureTasksList.innerHTML = futureTasks.map(task => createTaskCard(task)).join('');
 }
 
 function createTaskCard(task) {
@@ -195,10 +199,30 @@ function createTaskCard(task) {
     `;
 }
 
+let currentlyAddingTask = false;
+
 function openEditModal(taskId) {
-    currentEditTaskId = taskId;
-    const task = tasks.find(t => t.id === taskId);
-    
+    let task;
+    if (parseInt(taskId) == -1) {
+        currentlyAddingTask = true;
+        document.getElementById('editTaskModalTitle').innerHTML = "Add Task";
+        currentEditTaskId = String(parseInt(tasks[tasks.length-1].id)+1);
+        task = {
+            id: currentEditTaskId,
+            title: '', 
+            description: '', 
+            timeNeeded: 60, 
+            priority: 50, 
+            dueDate: new Date().toISOString().slice(0, 10)
+        }
+        tasks.push(task);
+    } else {
+        currentlyAddingTask = false;    
+        document.getElementById('editTaskModalTitle').innerHTML = "Edit Task";
+        currentEditTaskId = taskId;
+        task = tasks.find(t => t.id === taskId);
+    }
+
     document.getElementById('edit-task-title').value = task.title;
     document.getElementById('edit-task-description').value = task.description;
     document.getElementById('edit-task-due-date').value = task.dueDate;
@@ -221,10 +245,15 @@ function updatePriorityDisplay(priority) {
 }
 
 document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+    if (currentlyAddingTask) {
+        tasks.splice(tasks.length-1,1);
+    }
     document.getElementById('edit-task-modal').classList.remove('show');
+    currentlyAddingTask = false;
 });
 
 document.getElementById('save-edit-btn').addEventListener('click', () => {
+    currentlyAddingTask = false;
     if (currentEditTaskId) {
         tasks = tasks.map(t => {
             if (t.id === currentEditTaskId) {
@@ -269,7 +298,10 @@ function renderSchedule() {
 // Timer Session
 document.getElementById('start-session-btn').addEventListener('click', () => {
     // start the timer
-    
+    if (totalTime <= 0) {
+        return;
+    }
+
     document.getElementById('current-task-name').textContent = 'test';
     document.getElementById('timer-session').classList.remove('hidden');
     
@@ -278,22 +310,24 @@ document.getElementById('start-session-btn').addEventListener('click', () => {
 
 document.getElementById('exit-session-btn').addEventListener('click', () => {
     // stop the timer
+
     document.getElementById('timer-session').classList.add('hidden');
 });
 
-document.getElementById('pause-resume-btn').addEventListener('click', () => {
-    isPaused = !isPaused;
-    document.getElementById('pause-resume-btn').textContent = isPaused ? 'Resume' : 'Pause';
+// document.getElementById('pause-resume-btn').addEventListener('click', () => {
+//     isPaused = !isPaused;
+//     document.getElementById('pause-resume-btn').textContent = isPaused ? 'Resume' : 'Pause';
     
-    if (!isPaused) {
-        // resume the timer
-    } else {
-        // stop the timer
-    }
-});
+//     if (!isPaused) {
+//         // resume the timer
+//     } else {
+//         // stop the timer
+//     }
+// });
 
 document.getElementById('add-time-btn').addEventListener('click', () => {
-    // add time
+    addStudyMinutes(5);
+    console.log('here')
 });
 
 function updateSessionDisplay() {

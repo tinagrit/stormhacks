@@ -33,6 +33,23 @@
             display: none !important;
         }
 
+        #start-session-btn.inactive {
+            background-color: #2a2a2a;
+            border-color: #0a0a0a;
+            cursor: not-allowed;
+        }
+
+        .middleContainer {
+            display: flex;
+            justify-content: center;
+            gap: 5rem;
+        }
+
+        .enlargedPreview {
+            font-size: 2.5rem;
+            text-align: center;
+        }
+
         /* Navigation */
         .nav-bar {
             position: sticky;
@@ -83,6 +100,15 @@
         .nav-tab svg {
             width: 20px;
             height: 20px;
+        }
+
+        #mainBackground {
+            padding: 3rem;
+            background: linear-gradient(135deg, var(--card), rgba(127, 29, 29, 0.2));
+        }
+
+        #mainBackground.break {
+            background: linear-gradient(135deg, var(--card), rgba(29, 127, 65, 0.2));
         }
 
         /* Container */
@@ -155,7 +181,7 @@
             width: 100%;
             height: 6px;
             border-radius: 3px;
-            background: var(--secondary);
+            background: var(--border);
             outline: none;
         }
 
@@ -181,7 +207,7 @@
         /* Checkbox */
         .checkbox {
             width: 20px;
-            height: 20px;
+            height: 28px;
             border: 2px solid var(--border);
             border-radius: 0.25rem;
             background-color: var(--secondary);
@@ -273,6 +299,10 @@
             display: block;
         }
 
+        .task-item p {
+            margin-left: 0.5rem;
+        }
+
         /* Modal */
         .modal {
             display: none;
@@ -331,7 +361,7 @@
         /* Utility Classes */
         .text-primary { color: var(--primary); }
         .text-muted { color: var(--muted); }
-        .mb-2 { margin-bottom: 0.5rem; }
+        /* .mb-2 { margin-bottom: 0.5rem; } */
         .mb-4 { margin-bottom: 1rem; }
         .mb-6 { margin-bottom: 1.5rem; }
         .mt-4 { margin-top: 1rem; }
@@ -342,6 +372,10 @@
         .gap-4 { gap: 1rem; }
         .text-center { text-align: center; }
         .w-full { width: 100%; }
+
+        .timeNeeded {
+            margin-top: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -383,10 +417,13 @@
         <div id="page-home" class="page-content">
             <!-- Timer Preview -->
             <div class="card text-center mb-6">
-                <p class="text-muted mb-2">Ready to start</p>
-                <div class="time" id="preview-time">0 min</div>
-                <p class="text-muted mb-4">Study time</p>
-                <button class="btn btn-primary btn-lg" id="start-session-btn">
+                <div class="middleContainer">
+                    <div class="align">
+                        <p class="enlargedPreview" id="total-time-value">0 min</p>
+                        <p class="text-muted mb-4">Studying time</p>
+                    </div> 
+                </div>
+                <button class="btn btn-primary btn-lg inactive" id="start-session-btn">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z"></path>
                     </svg>
@@ -409,7 +446,7 @@
                     <h3 class="text-primary mb-4">Timer Configuration</h3>
                     <div class="mb-4">
                         <div class="flex justify-between mb-2">
-                            <label>Study Time</label>
+                            <label>Study Block</label>
                             <span class="text-primary" id="study-time-value">25 min</span>
                         </div>
                         <input type="range" class="slider" id="study-time-slider" min="1" max="120" step="1" value="25">
@@ -421,7 +458,7 @@
 
                     <div class="mb-4">
                         <div class="flex justify-between mb-2">
-                            <label>Break Time</label>
+                            <label>Break Block</label>
                             <span class="text-primary" id="break-time-value">10 min</span>
                         </div>
                         <input type="range" class="slider" id="break-time-slider" min="1" max="30" step="1" value="10">
@@ -432,9 +469,15 @@
                     </div>
 
                     <div style="padding-top: 1rem; border-top: 1px solid var(--border);">
-                        <div class="flex justify-between">
-                            <label>Total Studying Time</label>
-                            <span class="text-primary" id="total-time-value">0 min</span>
+                        <!-- <div class="flex justify-between">
+                            <label>Total time (including breaks)</label>
+                            <span class="text-primary" id="preview-time">0 min</span>
+                        </div> -->
+                        <div class="middleContainer">
+                            <div class="align">
+                                <p class="enlargedPreview" id="preview-time">0 min</p>
+                                <p class="text-muted mb-4">Total time (including breaks)</p>
+                            </div> 
                         </div>
                     </div>
                 </div>
@@ -528,13 +571,8 @@
                 <div id="current-tasks-list" class="grid gap-4"></div>
             </div>
 
-            <div class="mb-6">
-                <h3 class="text-primary mb-4">Future Tasks</h3>
-                <div id="future-tasks-list" class="grid gap-4"></div>
-            </div>
-
             <div class="text-center">
-                <button class="btn btn-primary btn-lg" style="padding-left: 3rem; padding-right: 3rem;">Save All Changes</button>
+                <button onclick="openEditModal(-1)" class="btn btn-primary btn-lg" style="padding-left: 3rem; padding-right: 3rem;">Add New</button>
             </div>
         </div>
 
@@ -592,13 +630,13 @@
         <div style="display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 5rem); padding: 1.5rem;">
             <div style="width: 100%; max-width: 900px;">
                 <!-- Timer Display -->
-                <div class="card timer-session mb-6" style="padding: 3rem; background: linear-gradient(135deg, var(--card), rgba(127, 29, 29, 0.2));">
+                <div class="card timer-session mb-6" id="mainBackground">
                     <div class="text-center">
-                        <p class="text-muted mb-2" id="session-phase">Study Time</p>
+                        <h2 class=" mb-2" id="session-phase">Study Time</h2>
                         <div class="time" id="session-timer">25:00</div>
                         <div style="padding-top: 1rem;" id="session-task-info">
                             <p class="text-muted mb-2">Work on</p>
-                            <h2 class="text-primary" id="current-task-name">Complete Math Assignment</h2>
+                            <h2 class="" id="current-task-name">Complete Math Assignment</h2>
                         </div>
                     </div>
                 </div>
@@ -607,11 +645,11 @@
                 <div class="card mb-6">
                     <div class="flex justify-between mb-4">
                         <span class="text-muted">Session Time Left:</span>
-                        <span class="text-primary" id="session-time-left">35m</span>
+                        <span class="" id="session-time-left"></span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-muted">Current Interval:</span>
-                        <span id="current-interval">25 min (Study)</span>
+                        <span id="current-interval"></span>
                     </div>
                 </div>
 
@@ -626,9 +664,9 @@
                 </div>
 
                 <!-- Control Buttons -->
-                <div class="text-center">
+                <!-- <div class="text-center">
                     <button class="btn btn-primary btn-lg" id="pause-resume-btn">Pause</button>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -636,7 +674,7 @@
     <!-- Edit Task Modal -->
     <div id="edit-task-modal" class="modal">
         <div class="modal-content">
-            <h2 class="mb-4">Edit Task</h2>
+            <h2 class="mb-4" id="editTaskModalTitle">Edit Task</h2>
             <div class="mb-4">
                 <label class="mb-2" style="display: block;">Task Title</label>
                 <input type="text" id="edit-task-title">
