@@ -1,7 +1,9 @@
 {
   "version": 2,
-  "builds": [{ "src": "backend/index.js", "use": "@vercel/node" }],
+  "builds": [
+    { "src": "backend/index.js", "use": "@vercel/node" }
+  ],
   "routes": [
-    { "src": "/api/(pdf|quote)", "dest": "backend/index.js" }
+    { "src": "/api/(.*)", "dest": "backend/index.js" }
   ]
 }
