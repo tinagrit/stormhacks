@@ -9,8 +9,8 @@ import pdfHandler from "./pdfTojson.js";
 import quoteHandler from "./quote.js";
 
 // Routes
-app.post("/api/pdfTojson", pdfHandler);
-app.post("/api/quote", quoteHandler);
+app.post("/pdfTojson", pdfHandler);
+app.post("/quote", quoteHandler);
 
 // Catch-all 404
 app.use((req, res) => {
