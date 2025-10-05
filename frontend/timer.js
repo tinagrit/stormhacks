@@ -1,110 +1,105 @@
-// all time variables in miliseconds
+// all time variables in milliseconds
 
-const minToMs = (minutes) => {return minutes*60*1000};
-
-// hardcoded example data
-const targetTotalTime = minToMs(1);
-const studyBlock = minToMs(0.1);
-const breakBlock = minToMs(0.05);
-
+// const minToMs = (minutes) => {
+//     return minutes * 60 * 1000;
+// };
 
 // helper functions
 const updateHTML = () => {
-    document.getElementById('currentTimer').querySelector('.hour').innerHTML = forceTwoDigits(currentTimer.hour);
-    document.getElementById('currentTimer').querySelector('.minute').innerHTML = forceTwoDigits(currentTimer.minute);
-    document.getElementById('currentTimer').querySelector('.second').innerHTML = forceTwoDigits(currentTimer.second);
+    let sessionTimerText = "";
+    if (currentTimer.hour > 0) {
+        sessionTimerText += forceTwoDigits(currentTimer.hour) + ':';
+    }
+    sessionTimerText += forceTwoDigits(currentTimer.minute) + ':' + forceTwoDigits(currentTimer.second);
+    document.getElementById('session-timer').innerHTML = sessionTimerText;
 
-    document.getElementById('fullTimer').querySelector('.hour').innerHTML = forceTwoDigits(fullTimer.hour);
-    document.getElementById('fullTimer').querySelector('.minute').innerHTML = forceTwoDigits(fullTimer.minute);
-    document.getElementById('fullTimer').querySelector('.second').innerHTML = forceTwoDigits(fullTimer.second);
-}
+    let fullTimerText = "";
+    if (fullTimer.hour > 0) {
+        fullTimerText += forceTwoDigits(fullTimer.hour) + ':';
+    }
+    fullTimerText += forceTwoDigits(fullTimer.minute) + ':' + forceTwoDigits(fullTimer.second);
+    document.getElementById('session-time-left').innerHTML = fullTimerText;
+};
 
 const forceTwoDigits = (int) => {
-    return int.toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false})
-}
+    return int.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+};
 
 const updateTimerObj = (obj) => {
     let total = obj.time;
-
     obj.hour = Math.floor(total / 3600000);
     obj.minute = Math.floor((total % 3600000) / 60000);
     obj.second = Math.floor((total % 60000) / 1000);
+};
+
+let numBlocks = Math.floor(studyTime / studyBlock);
+
+// Array: [{type: 'study', duration}, {type: 'break', duration}, ...]
+let blocks = [];
+let totalTime = 0;
+function recalculateBlocks() {
+    numBlocks = Math.floor(studyTime / studyBlock);
+    totalTime = (numBlocks * studyBlock) + ((numBlocks - 1) * breakBlock);
+    blocks = [];
+    for (let i = 0; i < numBlocks; i++) {
+        blocks.push({ type: 'study', duration: studyBlock });
+        if (i !== numBlocks - 1) {
+            blocks.push({ type: 'break', duration: breakBlock });
+        }
+    }
 }
 
-// calculations
-const fullBlock = studyBlock + breakBlock;
-let totalTime = targetTotalTime - breakBlock; // so that it doesn't end with a break
-
-if (targetTotalTime % fullBlock != 0) {
-    totalTime = (Math.floor(targetTotalTime/fullBlock) + 1)*fullBlock - breakBlock;
-}
-
-let isBreak = 0;
-
-let currentTimer = {
-    time: 0,
-    hour: 0,
-    minute: 0,
-    second: 0
-}
-
-currentTimer.time = studyBlock;
+let currentTimer = { time: blocks[0] ? blocks[0].duration : 0, hour: 0, minute: 0, second: 0 };
 updateTimerObj(currentTimer);
 
-let fullTimer = {
-    time: 0,
-    hour: 0,
-    minute: 0,
-    second: 0
-}
-
-fullTimer.time = totalTime;
+let fullTimer = { time: totalTime, hour: 0, minute: 0, second: 0 };
 updateTimerObj(fullTimer);
 
-updateHTML();
+function addStudyMinutes(minutes) {
+    studyTime += minToMs(minutes);
+    recalculateBlocks();
+}
 
+let startTime = Date.now();
+function restartTimer() {
+    startTime = Date.now();
 
-const startTime = new Date().getTime();
-
-function tick() {
-    const now = new Date().getTime();
-    const elapsed = now - startTime;
-
-    const fullBlockCount = Math.floor(elapsed / fullBlock);
-    const timeInBlock = elapsed % fullBlock;
-
-    if (timeInBlock < studyBlock) {
-        state = 0;
-        document.getElementById('sessionName').innerHTML = "Study Time";
-        currentTimer.time = studyBlock - timeInBlock;
-    } else {
-        state = 1;
-        document.getElementById('sessionName').innerHTML = "Break Time";
-        currentTimer.time = fullBlock - timeInBlock;
-    }
-
-    // Calculate full timer remainder (time left in total session)
-    const timeRemaining = totalTime - elapsed;
-    fullTimer.time = timeRemaining > 0 ? timeRemaining : 0;
-
-    // When total time runs out, finish timer
-    if (timeRemaining <= 0) {
-        currentTimer.time = 0;
-        updateTimerObj(currentTimer);
-        updateTimerObj(fullTimer);
-        updateHTML();
-        document.getElementById('sessionName').innerHTML = "Session Ended";
-        return; // Stop updating
-    }
-
-    // Update timer objects and HTML
+    // reset to block[0]
+    currentTimer.time = blocks[0] ? blocks[0].duration : 0;
+    fullTimer.time = totalTime;
     updateTimerObj(currentTimer);
     updateTimerObj(fullTimer);
     updateHTML();
-
-    // Queue next frame update for smooth and accurate timing
     requestAnimationFrame(tick);
 }
 
-// Start the timer loop with requestAnimationFrame
-requestAnimationFrame(tick);
+function tick() {
+    let now = Date.now();
+    let elapsed = now - startTime;
+    let timePassed = 0, state = 'study', timeInBlock = 0, blockIndex = 0;
+
+    for (; blockIndex < blocks.length; blockIndex++) {
+        if (elapsed < timePassed + blocks[blockIndex].duration) {
+            state = blocks[blockIndex].type;
+            timeInBlock = elapsed - timePassed;
+            break;
+        }
+        timePassed += blocks[blockIndex].duration;
+    }
+
+    let timeLeft = blockIndex < blocks.length ? blocks[blockIndex].duration - timeInBlock : 0;
+
+    currentTimer.time = timeLeft;
+    fullTimer.time = Math.max(totalTime - elapsed, 0);
+    updateTimerObj(currentTimer);
+    updateTimerObj(fullTimer);
+
+    document.getElementById('session-phase').textContent =
+        blockIndex < blocks.length ? (state === 'study' ? "Study" : "Break") : "Session Ended";
+
+    updateHTML();
+
+    if (fullTimer.time > 0) {
+        setTimeout(()=>{requestAnimationFrame(tick);},500);
+    }
+}

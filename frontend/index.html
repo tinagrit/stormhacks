@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study app</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #0a0a0a;
+            --foreground: #fafafa;
+            --card: #141414;
+            --primary: #dc2626;
+            --secondary: #1f1f1f;
+            --muted: #a1a1a1;
+            --border: #262626;
+            --accent: #7f1d1d;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--background);
+            color: var(--foreground);
+            line-height: 1.5;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Navigation */
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            width: 100%;
+            border-bottom: 1px solid var(--border);
+            background-color: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            height: 4rem;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--foreground);
+        }
+
+        .nav-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .nav-tab svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            background-color: var(--secondary);
+            color: var(--foreground);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #2a2a2a;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-lg {
+            padding: 0.75rem 2rem;
+            font-size: 1.125rem;
+        }
+
+        /* Inputs */
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            background-color: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            color: var(--foreground);
+            font-size: 1rem;
+        }
+
+        /* Slider */
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--secondary);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Checkbox */
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 0.25rem;
+            background-color: var(--secondary);
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .badge-critical {
+            background-color: rgba(220, 38, 38, 0.2);
+            color: var(--primary);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .badge-high {
+            background-color: rgba(127, 29, 29, 0.3);
+            color: var(--foreground);
+            border-color: rgba(127, 29, 29, 0.4);
+        }
+
+        .badge-medium {
+            background-color: rgba(31, 31, 31, 0.5);
+            color: var(--muted);
+            border-color: var(--border);
+        }
+
+        .badge-low {
+            background-color: var(--secondary);
+            color: var(--muted);
+            border-color: var(--border);
+        }
+
+        /* Timer Display */
+        .timer-display {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .timer-display .time {
+            font-size: 4rem;
+            color: var(--primary);
+            letter-spacing: 0.1em;
+            margin: 1rem 0;
+        }
+
+        .timer-session .time {
+            font-size: 6rem;
+        }
+
+        /* Task Item */
+        .task-item {
+            padding: 1rem;
+            background-color: rgba(31, 31, 31, 0.5);
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .task-item:hover {
+            background-color: var(--secondary);
+        }
+
+        .task-item .timeNeeded {
+            display: none;
+        }
+
+        .task-item .timeNeeded.active {
+            display: block;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Schedule Table */
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .schedule-table th,
+        .schedule-table td {
+            border: 1px solid var(--border);
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .schedule-table th {
+            background-color: rgba(31, 31, 31, 0.5);
+        }
+
+        .schedule-event {
+            background-color: rgba(220, 38, 38, 0.2);
+            border-left: 4px solid var(--primary);
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            text-align: left;
+        }
+
+        /* Utility Classes */
+        .text-primary { color: var(--primary); }
+        .text-muted { color: var(--muted); }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .text-center { text-align: center; }
+        .w-full { width: 100%; }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <div class="nav-container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-page="home">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Home
+                </button>
+                <button class="nav-tab" data-page="courses">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                    Courses
+                </button>
+                <button class="nav-tab" data-page="tasks">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                    Tasks
+                </button>
+                <button class="nav-tab" data-page="schedule">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Schedule
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- HOME PAGE -->
+        <div id="page-home" class="page-content">
+            <!-- Timer Preview -->
+            <div class="card text-center mb-6">
+                <p class="text-muted mb-2">Ready to start</p>
+                <div class="time" id="preview-time">25:00</div>
+                <p class="text-muted mb-4">Study time</p>
+                <button class="btn btn-primary btn-lg" id="start-session-btn">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                    Start Session
+                </button>
+            </div>
+
+            <div class="grid grid-2">
+                <!-- Tasks To Complete -->
+                <div class="card">
+                    <h3 class="text-primary mb-4">To Complete:</h3>
+                    <div id="task-list" class="grid gap-4"></div>
+                    <p id="no-tasks-msg" class="text-center text-muted hidden" style="padding: 2rem 0;">
+                        No tasks remaining. Great job!
+                    </p>
+                </div>
+
+                <!-- Timer Configuration -->
+                <div class="card">
+                    <h3 class="text-primary mb-4">Timer Configuration</h3>
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-2">
+                            <label>Study Time</label>
+                            <span class="text-primary" id="study-time-value">25 min</span>
+                        </div>
+                        <input type="range" class="slider" id="study-time-slider" min="0" max="120" step="1" value="25">
+                        <div class="flex justify-between text-muted" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                            <span>0 min</span>
+                            <span>120 min</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-2">
+                            <label>Break Time</label>
+                            <span class="text-primary" id="break-time-value">10 min</span>
+                        </div>
+                        <input type="range" class="slider" id="break-time-slider" min="0" max="30" step="1" value="10">
+                        <div class="flex justify-between text-muted" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                            <span>0 min</span>
+                            <span>30 min</span>
+                        </div>
+                    </div>
+
+                    <div style="padding-top: 1rem; border-top: 1px solid var(--border);">
+                        <div class="flex justify-between">
+                            <label>Total Studying Time</label>
+                            <span class="text-primary" id="total-time-value">0 min</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COURSES PAGE -->
+        <div id="page-courses" class="page-content hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-primary mb-2">SFU Course Adder</h2>
+                <p class="text-muted">Select your courses and preferred campus</p>
+            </div>
+
+            <div class="card mb-4">
+                <div class="grid grid-3">
+                    <div>
+                        <label class="mb-2" style="display: block;">Term</label>
+                        <select id="term-select">
+                            <option value="">Select term</option>
+                            <option value="fall2025">Fall 2025</option>
+                            <option value="spring2026">Spring 2026</option>
+                            <option value="summer2026">Summer 2026</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-2" style="display: block;">Department Name</label>
+                        <select id="department-select">
+                            <option value="">Select department</option>
+                            <option value="CMPT">CMPT</option>
+                            <option value="MATH">MATH</option>
+                            <option value="PHYS">PHYS</option>
+                            <option value="ENSC">ENSC</option>
+                            <option value="CHEM">CHEM</option>
+                            <option value="BIOL">BIOL</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-2" style="display: block;">Course Number</label>
+                        <select id="course-number-select">
+                            <option value="">Select course number</option>
+                            <option value="101">101</option>
+                            <option value="105">105</option>
+                            <option value="120">120</option>
+                            <option value="125">125</option>
+                            <option value="150">150</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="course-list" class="grid gap-4 mb-4">
+                <div class="card">
+                    <h3 class="text-primary mb-2">CMPT 120 <span class="badge badge-medium">2 sections</span></h3>
+                    <p class="text-muted mb-4">Introduction to Computing Science and Programming I</p>
+                    
+                    <label class="mb-2" style="display: block;">Select Campus:</label>
+                    <div class="grid gap-2">
+                        <label class="card" style="cursor: pointer; padding: 1rem;">
+                            <div class="flex gap-3">
+                                <input type="radio" name="cmpt120" value="burnaby">
+                                <div>
+                                    <div class="text-primary mb-1">Burnaby Campus</div>
+                                    <p class="text-muted" style="font-size: 0.875rem;">Mon/Wed 10:30 AM - 12:20 PM</p>
+                                    <p class="text-muted" style="font-size: 0.875rem;">Instructor: Dr. Smith</p>
+                                </div>
+                            </div>
+                        </label>
+                        <label class="card" style="cursor: pointer; padding: 1rem;">
+                            <div class="flex gap-3">
+                                <input type="radio" name="cmpt120" value="surrey">
+                                <div>
+                                    <div class="text-primary mb-1">Surrey Campus</div>
+                                    <p class="text-muted" style="font-size: 0.875rem;">Tue/Thu 2:30 PM - 4:20 PM</p>
+                                    <p class="text-muted" style="font-size: 0.875rem;">Instructor: Dr. Johnson</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right;">
+                <button class="btn btn-primary btn-lg">Save Courses</button>
+            </div>
+        </div>
+
+        <!-- TASKS PAGE -->
+        <div id="page-tasks" class="page-content hidden">
+            <div class="mb-6">
+                <h3 class="text-primary mb-4">Current Tasks</h3>
+                <div id="current-tasks-list" class="grid gap-4"></div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-primary mb-4">Future Tasks</h3>
+                <div id="future-tasks-list" class="grid gap-4"></div>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary btn-lg" style="padding-left: 3rem; padding-right: 3rem;">Save All Changes</button>
+            </div>
+        </div>
+
+        <!-- SCHEDULE PAGE -->
+        <div id="page-schedule" class="page-content hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-primary">Weekly Schedule</h2>
+                    <p class="text-muted">October 6 - October 12, 2025</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="badge badge-critical">Classes</span>
+                    <span class="badge badge-high">Tutorials</span>
+                    <span class="badge badge-medium">Study</span>
+                </div>
+            </div>
+
+            <div class="card" style="overflow-x: auto;">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Monday</th>
+                            <th>Tuesday</th>
+                            <th>Wednesday</th>
+                            <th>Thursday</th>
+                            <th>Friday</th>
+                            <th>Saturday</th>
+                            <th>Sunday</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedule-body"></tbody>
+                </table>
+            </div>
+
+            <p class="text-center text-muted mt-4" style="font-size: 0.875rem;">
+                Click on any time slot to add an event (feature coming soon)
+            </p>
+        </div>
+    </div>
+
+    <!-- Timer Session Page (Full Screen Overlay) -->
+    <div id="timer-session" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--background); z-index: 200;">
+        <div class="nav-bar">
+            <div class="nav-container" style="padding: 1rem;">
+                <button class="btn" id="exit-session-btn">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to Home
+                </button>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 5rem); padding: 1.5rem;">
+            <div style="width: 100%; max-width: 900px;">
+                <!-- Timer Display -->
+                <div class="card timer-session mb-6" style="padding: 3rem; background: linear-gradient(135deg, var(--card), rgba(127, 29, 29, 0.2));">
+                    <div class="text-center">
+                        <p class="text-muted mb-2" id="session-phase">Study Time</p>
+                        <div class="time" id="session-timer">25:00</div>
+                        <div style="padding-top: 1rem;" id="session-task-info">
+                            <p class="text-muted mb-2">Work on</p>
+                            <h2 class="text-primary" id="current-task-name">Complete Math Assignment</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Info -->
+                <div class="card mb-6">
+                    <div class="flex justify-between mb-4">
+                        <span class="text-muted">Session Time Left:</span>
+                        <span class="text-primary" id="session-time-left">35m</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-muted">Current Interval:</span>
+                        <span id="current-interval">25 min (Study)</span>
+                    </div>
+                </div>
+
+                <!-- Add Time Button -->
+                <div class="text-center mb-6">
+                    <button class="btn btn-lg" id="add-time-btn">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        More time needed on this task (+5 min)
+                    </button>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="text-center">
+                    <button class="btn btn-primary btn-lg" id="pause-resume-btn">Pause</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div id="edit-task-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="mb-4">Edit Task</h2>
+            <div class="mb-4">
+                <label class="mb-2" style="display: block;">Task Title</label>
+                <input type="text" id="edit-task-title">
+            </div>
+            <div class="mb-4">
+                <label class="mb-2" style="display: block;">Description</label>
+                <input type="text" id="edit-task-description">
+            </div>
+            <div class="card mb-4" style="background-color: rgba(31, 31, 31, 0.5);">
+                <div class="flex justify-between mb-2">
+                    <label>Due Date</label>
+                    <span class="text-muted" id="edit-due-date-display"></span>
+                </div>
+                <input type="date" id="edit-task-due-date">
+            </div>
+            <div class="card mb-4" style="background-color: rgba(31, 31, 31, 0.5);">
+                <div class="flex justify-between mb-4">
+                    <label>Priority Level</label>
+                    <div class="flex gap-2 items-center">
+                        <span class="badge" id="edit-priority-badge">High</span>
+                        <span class="text-primary" id="edit-priority-value">80%</span>
+                    </div>
+                </div>
+                <input type="range" class="slider" id="edit-priority-slider" min="0" max="100" step="5" value="80">
+                <div class="flex justify-between text-muted" style="font-size: 0.75rem; margin-top: 0.5rem;">
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                    <span>Critical</span>
+                </div>
+            </div>
+            <div class="flex justify-between gap-4">
+                <button class="btn w-full" id="cancel-edit-btn">Cancel</button>
+                <button class="btn btn-primary w-full" id="save-edit-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./ui.js"></script>
+    <script src="./timer.js"></script>
+</body>
+</html>
