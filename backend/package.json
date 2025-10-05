@@ -7,8 +7,14 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
-    "express": "^4.18.2",
-    "serverless-http": "latest",
-    "pdfjs-dist": "^2.16.105"
-  }
+    "express": "^4.21.2",
+    "node-fetch": "^3.3.2",
+    "pdfjs-dist": "^2.16.105",
+    "serverless-http": "latest"
+  },
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
