@@ -32,6 +32,12 @@ let tasks = [
     { id: '4', title: 'Review Lecture Notes', description: 'Review all week notes', timeNeeded: 60,  priority: 40, dueDate: '2025-10-15'}
 ];
 
+let courses = [
+    { num: 'CMPT 225', desc: 'Data Structures and Programming' },
+    { num: 'CMPT 201', desc: 'Systems Programming' },
+    { num: 'EASC 103', desc: 'The Rise and Fall of the Dinosaurs' }
+]
+
 function saveTasksToLocalStorage() {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
@@ -105,6 +111,10 @@ async function sendCommand(cmd) {
   await writer.write(data);
   console.log('Sent: ' + cmd);
 }
+
+
+
+
 
 
 
@@ -364,6 +374,107 @@ document.getElementById('save-edit-btn').addEventListener('click', () => {
     }
 });
 
+
+
+
+// Course page
+function createCourseCard(course) {
+    return `
+        <div class="card" style="padding: 1.25rem;">
+            <div class="flex justify-between gap-4" style="align-items: flex-start;">
+                <div style="flex: 1;">
+                    <div class="flex items-center gap-3 mb-2" style="flex-wrap: wrap;">
+                        <h4>${course.num}</h4>
+                    </div>
+                    <p class="text-muted mb-2">${course.desc}</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderCoursesList() {
+    const currentCoursesList = document.getElementById('current-courses-list');
+
+    const currentCourses = courses;
+
+    currentCoursesList.innerHTML = currentCourses.map(course => createCourseCard(course)).join('');
+}
+
+const backend = "https://stormhacks.api.tinagrit.com/api/sfucourses/";
+
+const termSelect = document.getElementById("term");
+const deptSelect = document.getElementById("dept");
+const courseSelect = document.getElementById("course");
+const sectionSelect = document.getElementById("section");
+
+const currentYear = String(new Date().getFullYear());
+
+async function fetchAndFill(endpoint, params, select, labelKey = "text") {
+    const url = new URL(`${backend}/${endpoint}`);
+    if (params) Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+    const res = await fetch(url);
+    const data = await res.json();
+    select.innerHTML = "<option value=''>Select...</option>";
+
+    data.forEach(item => {
+    const value = item.value || item.text || item;
+    const label = item.text || item.value || item;
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = label;
+    select.appendChild(opt);
+    });
+}
+
+fetchAndFill("terms", { year: currentYear }, termSelect);
+deptSelect.innerHTML = "";
+courseSelect.innerHTML = "";
+sectionSelect.innerHTML = "";
+
+termSelect.addEventListener("change", async () => {
+    const year = currentYear;
+    const term = termSelect.value;
+    if (!term) return;
+    await fetchAndFill("departments", { year, term }, deptSelect);
+    courseSelect.innerHTML = "";
+    sectionSelect.innerHTML = "";
+});
+
+deptSelect.addEventListener("change", async () => {
+    const year = currentYear;
+    const term = termSelect.value;
+    const dept = deptSelect.value;
+    if (!dept) return;
+    await fetchAndFill("courses", { year, term, dept }, courseSelect);
+    sectionSelect.innerHTML = "";
+});
+
+courseSelect.addEventListener("change", async () => {
+    const year = currentYear;
+    const term = termSelect.value;
+    const dept = deptSelect.value;
+    const course = courseSelect.value;
+    if (!course) return;
+    await fetchAndFill("sections", { year, term, dept, course }, sectionSelect);
+});
+
+sectionSelect.addEventListener("change", () => {
+    const year = currentYear;
+    const { value: term } = termSelect;
+    const { value: dept } = deptSelect;
+    const { value: course } = courseSelect;
+    const { value: section } = sectionSelect;
+
+    if (section) {
+        console.log(`✅ You selected: ${year} ${term} ${dept} ${course} ${section}`);
+    }
+});
+
+
+
+
 // Schedule
 function renderSchedule() {
     const scheduleBody = document.getElementById('schedule-body');
@@ -437,4 +548,5 @@ function updateSessionDisplay() {
 // Initialize
 renderTasks();
 renderTasksPage();
+renderCoursesList();
 renderSchedule();

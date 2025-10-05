@@ -517,81 +517,41 @@
         <!-- COURSES PAGE -->
         <div id="page-courses" class="page-content hidden">
             <div class="text-center mb-6">
-                <h2 class="text-primary mb-2">SFU Course Adder</h2>
-                <p class="text-muted">Select your courses and preferred campus</p>
+                <h2 class="text-primary mb-2">SFU Course Search</h2>
+                <p class="text-muted">Select your courses</p>
             </div>
 
             <div class="card mb-4">
                 <div class="grid grid-3">
                     <div>
                         <label class="mb-2" style="display: block;">Term</label>
-                        <select id="term-select">
-                            <option value="">Select term</option>
-                            <option value="fall2025">Fall 2025</option>
-                            <option value="spring2026">Spring 2026</option>
-                            <option value="summer2026">Summer 2026</option>
+                        <select id="term">
                         </select>
                     </div>
                     <div>
                         <label class="mb-2" style="display: block;">Department Name</label>
-                        <select id="department-select">
-                            <option value="">Select department</option>
-                            <option value="CMPT">CMPT</option>
-                            <option value="MATH">MATH</option>
-                            <option value="PHYS">PHYS</option>
-                            <option value="ENSC">ENSC</option>
-                            <option value="CHEM">CHEM</option>
-                            <option value="BIOL">BIOL</option>
+                        <select id="dept">
                         </select>
                     </div>
                     <div>
                         <label class="mb-2" style="display: block;">Course Number</label>
-                        <select id="course-number-select">
-                            <option value="">Select course number</option>
-                            <option value="101">101</option>
-                            <option value="105">105</option>
-                            <option value="120">120</option>
-                            <option value="125">125</option>
-                            <option value="150">150</option>
+                        <select id="course">
                         </select>
                     </div>
-                </div>
-            </div>
-
-            <div id="course-list" class="grid gap-4 mb-4">
-                <div class="card">
-                    <h3 class="text-primary mb-2">CMPT 120 <span class="badge badge-medium">2 sections</span></h3>
-                    <p class="text-muted mb-4">Introduction to Computing Science and Programming I</p>
-                    
-                    <label class="mb-2" style="display: block;">Select Campus:</label>
-                    <div class="grid gap-2">
-                        <label class="card" style="cursor: pointer; padding: 1rem;">
-                            <div class="flex gap-3">
-                                <input type="radio" name="cmpt120" value="burnaby">
-                                <div>
-                                    <div class="text-primary mb-1">Burnaby Campus</div>
-                                    <p class="text-muted" style="font-size: 0.875rem;">Mon/Wed 10:30 AM - 12:20 PM</p>
-                                    <p class="text-muted" style="font-size: 0.875rem;">Instructor: Dr. Smith</p>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="card" style="cursor: pointer; padding: 1rem;">
-                            <div class="flex gap-3">
-                                <input type="radio" name="cmpt120" value="surrey">
-                                <div>
-                                    <div class="text-primary mb-1">Surrey Campus</div>
-                                    <p class="text-muted" style="font-size: 0.875rem;">Tue/Thu 2:30 PM - 4:20 PM</p>
-                                    <p class="text-muted" style="font-size: 0.875rem;">Instructor: Dr. Johnson</p>
-                                </div>
-                            </div>
-                        </label>
+                    <div>
+                        <label class="mb-2" style="display: block;">Section</label>
+                        <select id="section">
+                        </select>
                     </div>
                 </div>
             </div>
 
             <div style="text-align: right;">
-                <button class="btn btn-primary btn-lg">Save Courses</button>
+                <button class="btn btn-primary btn-lg">Add Course</button>
             </div>
+
+            <h3 class="text-primary mb-4">Current Courses</h3>
+            <div id="current-courses-list" class="grid gap-4"></div>
         </div>
 
         <!-- TASKS PAGE -->
