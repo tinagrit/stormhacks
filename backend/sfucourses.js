@@ -38,118 +38,110 @@ async function cachedFetch(url) {
   return data;
 }
 
-// -----------------------------------------------------------------------------
-// ROUTES
-// -----------------------------------------------------------------------------
+// Global ID tracker
+let appendCounter = 0;
 
-router.get("/", async (req,res)=> {
-  res.sendFile(path.join(__dirname, 'public_html', 'sfucourses.html'));
-})
+// --- Routes ---
 
-// 1️⃣ Get available years
 router.get("/years", async (req, res) => {
   try {
-    const url = BASE_URL;
-    const data = await cachedFetch(url);
+    const data = await cachedFetch(BASE_URL);
     res.json(data);
   } catch (err) {
-    console.error("Error fetching years:", err);
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch years" });
   }
 });
 
-// 2️⃣ Get available terms for a year
 router.get("/terms", async (req, res) => {
-  const year = (req.query.year || "").trim();
-  if (!year) return res.status(400).json({ error: "Missing ?year parameter" });
+  const { year } = req.query;
+  if (!year) return res.status(400).json({ error: "Missing ?year" });
 
   try {
-    const url = `${BASE_URL}?${encodeURIComponent(year)}`;
-    const data = await cachedFetch(url);
+    const data = await cachedFetch(`${BASE_URL}?${encodeURIComponent(year)}`);
     res.json(data);
   } catch (err) {
-    console.error("Error fetching terms:", err);
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch terms" });
   }
 });
 
-// 3️⃣ Get departments for a given year + term
 router.get("/departments", async (req, res) => {
-  const { year = "", term = "" } = req.query;
-  if (!year || !term)
-    return res.status(400).json({ error: "Missing ?year or ?term parameter" });
+  const { year, term } = req.query;
+  if (!year || !term) return res.status(400).json({ error: "Missing ?year or ?term" });
 
   try {
-    const url = `${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(
-      term.toLowerCase()
-    )}`;
-    const data = await cachedFetch(url);
+    const data = await cachedFetch(`${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(term)}`);
     res.json(data);
   } catch (err) {
-    console.error("Error fetching departments:", err);
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch departments" });
   }
 });
 
-// 4️⃣ Get course numbers for a department
 router.get("/courses", async (req, res) => {
-  const { year = "", term = "", dept = "" } = req.query;
-  if (!year || !term || !dept)
-    return res
-      .status(400)
-      .json({ error: "Missing ?year, ?term, or ?dept parameter" });
+  const { year, term, dept } = req.query;
+  if (!year || !term || !dept) return res.status(400).json({ error: "Missing ?year, ?term, or ?dept" });
 
   try {
-    const url = `${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(
-      term.toLowerCase()
-    )}/${encodeURIComponent(dept.toLowerCase())}`;
-    const data = await cachedFetch(url);
+    const data = await cachedFetch(`${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(term)}/${encodeURIComponent(dept)}`);
     res.json(data);
   } catch (err) {
-    console.error("Error fetching courses:", err);
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch courses" });
   }
 });
 
-// 5️⃣ Get sections for a specific course
 router.get("/sections", async (req, res) => {
-  const { year = "", term = "", dept = "", course = "" } = req.query;
-  if (!year || !term || !dept || !course)
-    return res
-      .status(400)
-      .json({ error: "Missing ?year, ?term, ?dept, or ?course parameter" });
+  const { year, term, dept, course } = req.query;
+  if (!year || !term || !dept || !course) return res.status(400).json({ error: "Missing parameters" });
 
   try {
-    const url = `${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(
-      term.toLowerCase()
-    )}/${encodeURIComponent(dept.toLowerCase())}/${encodeURIComponent(course)}`;
-    const data = await cachedFetch(url);
+    const data = await cachedFetch(`${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(term)}/${encodeURIComponent(dept)}/${encodeURIComponent(course)}`);
     res.json(data);
   } catch (err) {
-    console.error("Error fetching sections:", err);
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch sections" });
   }
 });
 
-// (optional) 6️⃣ Get specific section outline
+// --- New /outline route that returns events in your desired JSON ---
 router.get("/outline", async (req, res) => {
-  const { year = "", term = "", dept = "", course = "", section = "" } =
-    req.query;
+  const { year, term, dept, course, section } = req.query;
   if (!year || !term || !dept || !course || !section)
-    return res.status(400).json({
-      error: "Missing ?year, ?term, ?dept, ?course, or ?section parameter",
-    });
+    return res.status(400).json({ error: "Missing parameters" });
 
   try {
-    const url = `${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(
-      term.toLowerCase()
-    )}/${encodeURIComponent(dept.toLowerCase())}/${encodeURIComponent(
-      course
-    )}/${encodeURIComponent(section.toLowerCase())}`;
-    const data = await cachedFetch(url);
-    res.json(data);
+    const data = await cachedFetch(`${BASE_URL}?${encodeURIComponent(year)}/${encodeURIComponent(term)}/${encodeURIComponent(dept)}/${encodeURIComponent(course)}/${encodeURIComponent(section)}`);
+    const courseSchedule = data.courseSchedule;
+
+    console.log(courseSchedule);
+
+    // Prepare JSON object
+    const appendID = appendCounter++;
+    let subID = 0;
+    const events = [];
+
+    // SFU API usually has a 'meetings' array for section events
+    if (data.courseSchedule) {
+      data.courseSchedule.forEach(ev => {
+        // TODO: for however many of each weekday, keep going from range start date to end date 
+        const calcStartEpoch = new Date(`${"2025-09-03"}T${ev.startTime}:00`).getTime();
+        const calcEndEpoch = new Date(`${"2025-09-03"}T${ev.endTime}:00`).getTime();
+        events.push({
+          ID: appendID,
+          subID: subID++,
+          type: ev.sectionCode || "",
+          startEpoch: calcStartEpoch,
+          endEpoch: calcEndEpoch,
+          elapsed: calcEndEpoch - calcStartEpoch
+        });
+      });
+    }
+
+    res.json({ sem: `${term} ${year}`, events});
   } catch (err) {
-    console.error("Error fetching outline:", err);
+    console.error(err);
     res.status(500).json({ error: "Failed to fetch course outline" });
   }
 });
