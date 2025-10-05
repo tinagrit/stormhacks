@@ -1,10 +1,16 @@
-import express from "express";
-import serverless from "serverless-http";
+require("dotenv").config();
+const express = require("express");
+const serverless = require("serverless-http");
+const cors = require("cors");
 
 const app = express();
 
 // Middleware to parse JSON
 app.use(express.json());
+
+app.use(cors({
+  origin: "https://stormhacks.tinagrit.com"
+}))
 
 // Route for PDF
 app.post("/api/pdf", async (req, res) => {
@@ -34,4 +40,5 @@ app.use((req, res) => {
 });
 
 // Export as serverless handler
-export default serverless(app);
+module.exports = app;
+module.exports.handler = serverless(app);
