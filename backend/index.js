@@ -34,7 +34,7 @@ app.get("/api/quote", async (req, res) => {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
     const body = {
       contents: [
-        { parts: [{ text: "Give me a short, original motivational quote to inspire and reward someone with who just finished studying but needs to still study more. No formatting of any sorts, I just want the quote." }] }
+        { parts: [{ text: "Give me a short, original motivational quote to inspire and reward someone with, who just finished studying but needs to still study more. Make it simple. No formatting of any sorts, I just want the quote." }] }
       ]
     };
     const response = await fetch(url, {
